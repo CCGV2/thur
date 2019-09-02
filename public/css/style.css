@@ -10,6 +10,9 @@ body {
 /*a:hover {
     border-bottom: 3px solid #4fc08d;
 }*/
+a {
+    color: #999;
+}
 
 .button {
     background-color: #4fc08d !important;
@@ -26,20 +29,16 @@ body {
 /* ---------- nav ---------- */
 
 .nav {
-    margin-bottom: 20px;
+    height: 80px;
+    margin-bottom: 5px;
     color: #999;
     text-align: center;
 }
 
-.nav h1 {
-    color: #4fc08d;
-    display: inline-block;
-    margin: 5px 0;
-}
 
 .nav img {
-    padding: 10px 0;
-    width: 100%;
+    padding: 5px 5px;
+    height: 50px;
 }
 
 /* ---------- nav-setting ---------- */
@@ -52,13 +51,13 @@ body {
 }
 
 .nav-setting .avatar {
-    height: 30px;
-    width: 30px;
+    height: 40px;
+    width: 40px;
 }
 
 
 .nav-setting .ui.dropdown.button {
-    padding: 10px 10px 0 10px;
+    padding: 0 0 0 0;
     background-color: #fff !important;
 }
 
@@ -86,4 +85,119 @@ body {
 
 .post-content .tag.right a {
     color: #999;
+}
+
+/* ---------- home-content ---------- */
+.home-content {
+    height: calc(100% - 90px);
+    width: 100%;
+    background: url(../img/background.jpg);
+    background-position: right bottom;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.home-content .intro {
+    position: absolute;
+    top: 50%;
+    text-align: center;
+    width: 100%;
+    margin-top: -150px;
+    height: 300px;
+}
+
+/* ---------- copyright ---------- */
+
+.copyright {
+    height: 10px;
+    color: #999;
+    text-align: center;
+}
+
+.user-content {
+    height: calc(100% - 90px);
+    width: 100%;
+    background-position: right bottom;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.user-content .left-menu {
+    height: 100%;
+    width: 200px;
+    background-color: #C5C5C5;
+    text-align: center;
+}
+
+.new-file {
+    position: relative;
+    display: inline-block;
+    padding: 1.2em 2em;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    color: white;
+    top: 30px;
+}
+.new-file::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(135deg, #6e8efb, #a777e3);
+    border-radius: 4px;
+    transition: box-shadow .5s ease, transform .2s ease; 
+    will-change: transform;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .2);
+    transform:
+        translateY(var(--ty, 0))
+        rotateX(var(--rx, 0))
+        rotateY(var(--ry, 0))
+        translateZ(var(--tz, -12px));
+}
+
+.new-file:hover::before {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, .3);
+}
+.new-file::after {
+    position: relative;
+    display: inline-block;
+    content: attr(data-title);
+    transition: transform .2s ease; 
+    font-weight: bold;
+    letter-spacing: .01em;
+    will-change: transform;
+    transform:
+        translateY(var(--ty, 0))
+        rotateX(var(--rx, 0))
+        rotateY(var(--ry, 0));
+}
+
+.user-content .left-menu .new-file p{
+    margin-top: 10px;
+}
+
+/* ---------- right-diagrams ---------- */
+
+.user-content .right-diagrams {
+    height: 100%;
+    width: calc(100% - 210px);
+    margin-right: 10px;
+    background-color: #C5C5C5;
+    text-align: center;
+}
+
+.div-inline {
+    float: left;
+}
+
+.file-list {
+    width: 100%;
+}
+
+.file-list-item {
+    
 }

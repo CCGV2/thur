@@ -9,6 +9,12 @@ var pkg = require('./package');
 var winston = require('winston');
 var expressWinston = require('express-winston');
 var app = express();
+var mongoose = require('mongoose');
+var mongoDB = config.mongodb;
+mongoose.connect(mongoDB);
+mongoose.Promise = global.Promise;
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error'));
 
 // 设置模板目录
 app.set('views', path.join(__dirname, 'views'));
@@ -47,9 +53,11 @@ app.locals.blog = {
 // 添加模板必需的三个变量
 app.use(function (req, res, next) {
 	res.locals.user = req.session.user;
-	console.log(res.locals.user);
+	//console.log(res.locals.user);
 	res.locals.success = req.flash('success').toString();
 	res.locals.error = req.flash('error').toString();
+	res.locals.models = req.session.models;
+	console.log("req.session.user: " + req.session.user + "req.session.models: " + req.session.models);
 	next();
 });
 

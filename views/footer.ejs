@@ -1,4 +1,25 @@
+  <div class="copyright">
+  	Copyright © 2019
+     <strong>
+     	<a href="//bjutmodeling.com" target="_blank">北京工业大学实训建模平台</a>
+     </strong>
+     &nbsp;
+     <strong>
+     	<a href="//bjutmodeling.com" target="_blank">bjutmodeling.com</a>
+     </strong>
+     All Rights Reserved. 备案号：京ICP备19033515号
+  </div>
   <script type="text/javascript">
+    // 点击按钮弹框
+    $(function(){
+      $(".new-file").click(function(){
+        $(".new-file-modal").modal('show');
+      });
+      $(".new-file-modal").modal({
+        closable: true,
+        width: 100
+      });
+    });
     // 点击按钮弹出下拉框
     $('.ui.dropdown').dropdown();
     // 鼠标悬浮在头像上，弹出气泡提示框

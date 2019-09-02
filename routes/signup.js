@@ -3,8 +3,10 @@ var sha1 = require('sha1');
 var express = require('express');
 var router = express.Router();
 
-var UserModel = require('../models/users');
+var UserModel = require('../models/user');
 var checkNotLogin = require('../middlewares/check').checkNotLogin;
+
+var fs = require('fs');
 
 // GET /signup 注册页
 router.get('/', checkNotLogin, function (req, res, next) {
@@ -43,6 +45,7 @@ router.post('/', checkNotLogin, function(req, res, next) {
 		}
 	}
 	catch(e) {
+		fs.unlink(req.files.avatar.path);
 		req.flash('error', e.message);
 		return res.redirect('/signup');
 	}
@@ -53,7 +56,9 @@ router.post('/', checkNotLogin, function(req, res, next) {
 		password: password,
 		gender: gender,
 		bio: bio,
-		avatar: path.relative(path.resolve(__dirname, '../public'), avatar)
+		avatar: path.relative(path.resolve(__dirname, '../public'), avatar),
+		count: 0,
+		models: []
 	};
 
 	UserModel.create(user)
@@ -63,6 +68,7 @@ router.post('/', checkNotLogin, function(req, res, next) {
 			// 删除密码
 			delete user.password;
 			req.session.user = user;
+			req.session.models = user.models;
 			// 写入flash
 			req.flash('success', '注册成功');
 			// 跳转到首页

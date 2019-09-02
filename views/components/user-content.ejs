@@ -1,0 +1,117 @@
+<div class="user-content">
+	<div class="left-menu div-inline">
+		<p style="margin-top: 20px;">我的文件</p>
+		<p class="new-file" data-title="新建"></p>
+	</div>
+	<div class="right-diagrams div-inline">
+		<h5 style="text-align: left; margin-top: 10px;">我的文件</h5>
+		<div class="file-list">
+			<% for (var i = 0; i < models.length; i++) { %>
+			<td><%= models.title %></td>
+			<% } %>
+		</div>
+	</div>
+</div>
+
+<div class="ui modal new-file-modal">
+	<i class="close icon"></i>
+	<div class="header">
+		新建模型
+	</div>
+	<div class="new-file-model-content">
+		<form class="ui form" method="post">
+			<h4 class="ui dividing header">新建模型</h4>
+			<div class="field">
+				<label>文件名</label>
+				<input type="text" name="filename" placeholder="文件名">
+			</div>
+			<div class="field">
+				<label>模型类型</label>
+				<div class="ui selection dropdown">
+					<input type="hidden" name="filetype">
+					<div class="default text">模型类型</div>
+					<i class="dropdown icon"></i>
+					<div class="menu">
+						<div class="item" data-value="dfd">
+							数据流图
+						</div>
+						<div class="item" data-value="uml">
+							UML类图
+						</div>
+						<div class="item" data-value="ucd">
+							用例图
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="ui primary submit button">提交</div>
+			<div class="ui error message"></div>
+		</form>
+	</div>
+	<div></div>
+</div>
+
+<script type="text/javascript">
+	$('.ui.form')
+		.form({
+			fields: {
+				filename: {
+					identifier: 'filename',
+					rules: [{
+						type: 'empty',
+						prompt: '请输入文件名'
+					}]
+				},
+				filetype: {
+					identifier: 'filetype',
+					rules: [{
+						type: 'empty',
+						prompt: '请选择类型'
+					}]
+				}
+			},
+		});
+</script>
+<script type="text/javascript">
+	//新建按钮动画
+	const docStyle = document.documentElement.style
+    const aElem = document.querySelector('.new-file')
+    console.log(aElem);
+    const boundingClientRect = aElem.getBoundingClientRect()
+
+    aElem.onmousemove = function(e) {
+
+		const x = e.clientX - boundingClientRect.left
+		const y = e.clientY - boundingClientRect.top
+
+		const xc = boundingClientRect.width/2
+		const yc = boundingClientRect.height/2
+
+		const dx = x - xc
+		const dy = y - yc
+
+		docStyle.setProperty('--rx', `${ dy/-1 }deg`)
+		docStyle.setProperty('--ry', `${ dx/10 }deg`)
+
+    }
+
+    aElem.onmouseleave = function(e) {
+      
+		docStyle.setProperty('--ty', '0')
+		docStyle.setProperty('--rx', '0')
+		docStyle.setProperty('--ry', '0')
+      
+    }
+
+    aElem.onmousedown = function(e) {
+      
+		docStyle.setProperty('--tz', '-25px')
+      
+    }
+
+    document.body.onmouseup = function(e) {
+      
+		docStyle.setProperty('--tz', '-12px')
+      
+    }
+</script>

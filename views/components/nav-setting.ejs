@@ -2,13 +2,13 @@
   <div class="ui buttons">
     <div class="ui floating dropdown button">
       <% if (user) { %>
-        <img class="avatar" src="<%= user.avatar %>">
+        <img class="avatar" src="/<%= user.avatar %>">
       <% } else { %>
-        <img class="avatar" src="img/unlogin.png">
+        <img class="avatar" src="/img/unlogin.png">
       <% } %>
       <div class="menu">
         <% if (user) { %>
-          <a class="item" href="/posts?author=<%= user._id %>">个人主页</a>
+          <a class="item" href="/home/<%= user._id %>">个人主页</a>
           <div class="divider"></div>
           <a class="item" href="/posts/create">发表文章</a>
           <a class="item" href="/logout">登出</a>

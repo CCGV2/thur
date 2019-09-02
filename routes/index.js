@@ -1,4 +1,9 @@
 module.exports = function (app) {
+	app.use('/', function(req, res, next) {
+		console.log(req.url);
+		console.log(new Date());
+		next();
+	})
 	app.get('/', function (req, res) {
 		res.redirect('/home');
 	});
