@@ -16,20 +16,30 @@ router.get('/', checkNotLogin, function(req, res, next) {
 router.post('/', checkNotLogin, function(req, res, next) {
 	var name = req.fields.name;
 	var password = req.fields.password;
-
 	UserModel.findOne().byName(name).exec(function(err, user) {
+
 		if (!user) {
+			req.flash('error', '用户不存在');
 			return res.redirect('back');
 		}
+		console.log("23123");
 		//检查密码
 		if (sha1(password) != user.password) {
-			return res.redirect('back');
+			req.flash('error', '用户名或密码错误');
+			return res.redirect('login');
 		}
+		console.log("登陆成功");
 		req.flash('success', '登陆成功');
 		// 用户信息写入session
 		delete user.password;
 		req.session.user = user;
-		console.log("user: " + JSON.stringfy('user'));
+		if (user.count === 0) {
+			req.session.models = [];
+			return res.redirect(`/home/${user._id}`);
+		} else {
+			req.session.models = user.models;
+			return res.redirect(`/home/${user._id}`);
+		}
 	});
 
 	// UserModel.getUserByName(name)

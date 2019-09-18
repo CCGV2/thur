@@ -14,6 +14,6 @@ router.get('/', home_controller.index);
 
 router.get('/:userId', home_controller.user_detail);
 
-router.post('/:userId', home_controller.user_new_diagram);
+router.post('/create', home_controller.user_new_diagram);
 
 module.exports = router;

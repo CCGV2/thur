@@ -45,19 +45,24 @@ app.use(require('express-formidable')({
 }));
 
 // 设置模板全局常量
-app.locals.blog = {
+app.locals.platform = {
 	title: pkg.name,
 	description: pkg.description
 };
 
 // 添加模板必需的三个变量
 app.use(function (req, res, next) {
+	//console.log('middleware');
 	res.locals.user = req.session.user;
 	//console.log(res.locals.user);
 	res.locals.success = req.flash('success').toString();
 	res.locals.error = req.flash('error').toString();
 	res.locals.models = req.session.models;
-	console.log("req.session.user: " + req.session.user + "req.session.models: " + req.session.models);
+	res.locals.content = req.session.content;
+	// console.log("req.session.user: ")
+	// console.log(req.session.user)
+	// console.log("req.session.models");
+	// console.log(res.locals.models);
 	next();
 });
 

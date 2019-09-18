@@ -4,10 +4,14 @@
 		<p class="new-file" data-title="新建"></p>
 	</div>
 	<div class="right-diagrams div-inline">
-		<h5 style="text-align: left; margin-top: 10px;">我的文件</h5>
-		<div class="file-list">
-			<% for (var i = 0; i < models.length; i++) { %>
-			<td><%= models.title %></td>
+		<h5 style="text-align: left; margin-top: 10px; height: 20px;">我的文件</h5>
+		<div class="file-list ui horizontal five columns grid">
+			<% for (var i = 0; i < user.models.length; i++) { %>
+				<div class="column">
+					<a href="/post/<%= user.models[i] %>" class="ui small rounded image">
+						<img class="ui rounded small image" src="/img/<%= user.models[i] %>.jpg">
+					</a>
+				</div>
 			<% } %>
 		</div>
 	</div>
@@ -19,7 +23,7 @@
 		新建模型
 	</div>
 	<div class="new-file-model-content">
-		<form class="ui form" method="post">
+		<form class="ui form" method="post" action="/home/create">
 			<h4 class="ui dividing header">新建模型</h4>
 			<div class="field">
 				<label>文件名</label>

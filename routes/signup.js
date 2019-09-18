@@ -37,7 +37,7 @@ router.post('/', checkNotLogin, function(req, res, next) {
 		if (!req.files.avatar.name) {
 			throw new Error('缺少头像');
 		}
-		if (password.length <= 6) {
+		if (password.length < 6) {
 			throw new Error('密码过短');
 		}
 		if (password != repassword) {
@@ -45,7 +45,10 @@ router.post('/', checkNotLogin, function(req, res, next) {
 		}
 	}
 	catch(e) {
-		fs.unlink(req.files.avatar.path);
+		fs.unlink(req.files.avatar.path, function(err) {
+			console.log(err);
+		});
+		console.log(e);
 		req.flash('error', e.message);
 		return res.redirect('/signup');
 	}
@@ -60,28 +63,45 @@ router.post('/', checkNotLogin, function(req, res, next) {
 		count: 0,
 		models: []
 	};
+	console.log("nmsl");
 
-	UserModel.create(user)
-		.then(function(result) {
-			// 此user是插入Mongodb之后的值，包含_id
-			user = result.ops[0];
-			// 删除密码
-			delete user.password;
-			req.session.user = user;
-			req.session.models = user.models;
-			// 写入flash
-			req.flash('success', '注册成功');
-			// 跳转到首页
-			res.redirect('/home');
-		})
-		.catch(function(e) {
-			fs.unlink(req.files.avatar.path);
+	UserModel.create(user, function(err, user) {
+		if (err) {
+			fs.unlink(req.files.avatar.path, function(err) {
+				return res.redirect('/signup');
+			});
 			if (e.message.match('duplicate key')) {
 				req.flash('error', '用户名已被占用');
 				return res.redirect('/signup');
 			}
-			next(e);
-		})
+		}
+		delete user.password;
+		req.session.user = user;
+		req.session.models = user.models;
+		req.flash('success', '注册成功');
+		res.redirect('/home');
+	})
+	// UserModel.create(user)
+	// 	.then(function(result) {
+	// 		// 此user是插入Mongodb之后的值，包含_id
+	// 		user = result.ops[0];
+	// 		// 删除密码
+	// 		delete user.password;
+	// 		req.session.user = user;
+	// 		req.session.models = user.models;
+	// 		// 写入flash
+	// 		req.flash('success', '注册成功');
+	// 		// 跳转到首页
+	// 		res.redirect('/home');
+	// 	})
+	// 	.catch(function(e) {
+	// 		fs.unlink(req.files.avatar.path);
+	// 		if (e.message.match('duplicate key')) {
+	// 			req.flash('error', '用户名已被占用');
+	// 			return res.redirect('/signup');
+	// 		}
+	// 		next(e);
+	// 	})
 });
 
 module.exports = router;

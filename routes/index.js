@@ -1,7 +1,5 @@
 module.exports = function (app) {
 	app.use('/', function(req, res, next) {
-		console.log(req.url);
-		console.log(new Date());
 		next();
 	})
 	app.get('/', function (req, res) {
@@ -11,7 +9,7 @@ module.exports = function (app) {
 	app.use('/signup', require('./signup'));
 	app.use('/login', require('./login'));
 	app.use('/logout', require('./logout'));
-	app.use('/posts', require('./posts'));
+	app.use('/post', require('./post'));
 	app.use('/feedback', require('./feedback'));
 	app.use(function (req, res) {
 		if (!res.headerSent) {
