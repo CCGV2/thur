@@ -5,5 +5,6 @@ module.exports = {
     key: 'thur',
     maxAge: 2592000000
   },
-  mongodb: 'mongodb://localhost:27017/thur'
+	mongodb:'mongodb://gck:gengcongkai@cluster0-yqbl4.azure.mongodb.net:27017/test'
+
 };
