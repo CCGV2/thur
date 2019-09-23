@@ -4,6 +4,7 @@
   "description": "engineering platform",
   "main": "index.js",
   "dependencies": {
+    "compression": "^1.7.4",
     "config-lite": "^2.1.0",
     "connect-flash": "^0.1.1",
     "connect-mongo": "^3.0.0",
@@ -12,6 +13,7 @@
     "express-formidable": "^1.2.0",
     "express-session": "^1.16.2",
     "express-winston": "^3.3.0",
+    "helmet": "^3.21.1",
     "jimp": "^0.6.4",
     "marked": "^0.7.0",
     "moment": "^2.24.0",
