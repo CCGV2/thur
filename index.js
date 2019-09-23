@@ -8,10 +8,16 @@ var routes = require('./routes');
 var pkg = require('./package');
 var winston = require('winston');
 var expressWinston = require('express-winston');
+var helmet = require('helmet');
 var app = express();
+
+app.use(helmet())
 var mongoose = require('mongoose');
+
+var compression = require('compression');
 var mongoDB = config.mongodb;
-mongoose.connect(mongoDB);
+var mongoDBOption = config.mongodbop;
+mongoose.connect(mongoDB, mongoDBOption);
 mongoose.Promise = global.Promise;
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error'));
@@ -20,6 +26,8 @@ db.on('error', console.error.bind(console, 'MongoDB connection error'));
 app.set('views', path.join(__dirname, 'views'));
 // 设置模板引擎为 ejs
 app.set('view engine', 'ejs');
+
+app.use(compression())
 
 // 设置静态文件目录
 app.use(express.static(path.join(__dirname, 'public')));
