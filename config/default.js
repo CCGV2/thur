@@ -5,7 +5,5 @@ module.exports = {
     key: 'thur',
     maxAge: 2592000000
   },
-  mongodb:"mongodb+srv://gck:gengcongkai@cluster0-yqbl4.azure.mongodb.net/test?retryWrites=true&w=majority",
-
-  mongodbop:{dbName:'thur'}
+  mongodb:"mongodb://localhost:27017/thur"
 };

@@ -16,8 +16,7 @@ var mongoose = require('mongoose');
 
 var compression = require('compression');
 var mongoDB = config.mongodb;
-var mongoDBOption = config.mongodbop;
-mongoose.connect(mongoDB, mongoDBOption);
+mongoose.connect(mongoDB);
 mongoose.Promise = global.Promise;
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error'));
