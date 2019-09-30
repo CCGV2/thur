@@ -133,9 +133,37 @@ myDiagram.nodeTemplateMap.add('entity', entityTemplate);
 myDiagram.nodeTemplateMap.add('structure', structureTemplate);
 myDiagram.nodeTemplateMap.add('process', processTemplate);
 
+myDiagram.model = new go.GraphLinksModel(modelJSON["nodes"], modelJSON["links"]);
+
 palette.nodeTemplateMap = myDiagram.nodeTemplateMap;
+
 palette.model.nodeDataArray = [
 	{category: "entity", 文本: "外部实体"},
 	{category: "structure", 文本: "数据存储"},
 	{category: "process", 文本: "加工"}
 ];
+function save() {
+	myDiagram.isModified = false;
+	var dataJSON = myDiagram.model.toJson();
+    dataJSON = dataJSON.replace(/[\'\\\/\b\f\n\r\t]/g, '');
+    dataJSON = dataJSON.replace(/[\"]/g, '\"');
+    var t = typeof dataJSON;
+    console.log(t);
+    console.log(dataJSON);
+    var base_url = window.location.pathname;
+    
+	$.ajax({
+		url: 'save',
+		data: {},
+		type: "POST",
+		dataType: "txt",
+		contentType: "application/x-www-form-urlencoded",
+		
+		success: function(msg) {
+			alert(msg);
+		},
+		error: function(msg) {
+			console.log(msg);
+		}
+	})
+}

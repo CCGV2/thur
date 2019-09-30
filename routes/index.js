@@ -10,6 +10,7 @@ module.exports = function (app) {
 	app.use('/login', require('./login'));
 	app.use('/logout', require('./logout'));
 	app.use('/post', require('./post'));
+	app.use('/save', require('./save'));
 	app.use('/feedback', require('./feedback'));
 	app.use(function (req, res) {
 		if (!res.headerSent) {

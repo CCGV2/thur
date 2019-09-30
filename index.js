@@ -9,12 +9,14 @@ var pkg = require('./package');
 var winston = require('winston');
 var expressWinston = require('express-winston');
 var helmet = require('helmet');
+var bodyParser = require('body-parser');
+var urlencodedParser = bodyParser.urlencoded({extended: false})
 var app = express();
 
-app.use(helmet())
+//app.use(helmet())
 var mongoose = require('mongoose');
 
-var compression = require('compression');
+//var compression = require('compression');
 var mongoDB = config.mongodb;
 mongoose.connect(mongoDB);
 mongoose.Promise = global.Promise;
@@ -26,11 +28,14 @@ app.set('views', path.join(__dirname, 'views'));
 // 设置模板引擎为 ejs
 app.set('view engine', 'ejs');
 
-app.use(compression())
-
+//app.use(compression())
 // 设置静态文件目录
 app.use(express.static(path.join(__dirname, 'public')));
 // session 中间件
+app.use(bodyParser.urlencoded({
+   extended: false
+}))
+app.use(bodyParser.json())
 
 app.use(session({
     name: config.session.key,// 设置 cookie 中保存 session id 的字段名称
@@ -60,16 +65,16 @@ app.locals.platform = {
 // 添加模板必需的三个变量
 app.use(function (req, res, next) {
 	//console.log('middleware');
+	console.log("req.body:");
+	console.log(req.body);
 	res.locals.user = req.session.user;
 	//console.log(res.locals.user);
 	res.locals.success = req.flash('success').toString();
 	res.locals.error = req.flash('error').toString();
 	res.locals.models = req.session.models;
 	res.locals.content = req.session.content;
-	// console.log("req.session.user: ")
-	// console.log(req.session.user)
-	// console.log("req.session.models");
-	// console.log(res.locals.models);
+	res.locals.page = req.session.page;
+	
 	next();
 });
 
