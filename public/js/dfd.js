@@ -66,6 +66,7 @@ function makePort(name, align, spot, output, input) {
 }
 
 var tool = new PolylineLinkingTool();
+myDiagram.toolManager.linkingTool = tool;
 
 var entityTemplate = GO(go.Node, "Table", nodeStyle(),{
 	click:function(e, obj){
@@ -136,6 +137,7 @@ var palette = GO(go.Palette, 'myPaletteDiv', {
 myDiagram.linkTemplate = GO(
 	go.Link,
 	{ reshapable: true, resegmentable: true},
+	{ adjusting: go.Link.Stretch},
 	new go.Binding("points", "points").makeTwoWay(),
 	GO(go.Shape, {strokeWidth: 1.5}),
 	GO(go.Shape, {toArrow: "OpenTriangle"})
