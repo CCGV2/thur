@@ -65,8 +65,6 @@ function makePort(name, align, spot, output, input) {
 	});
 }
 
-var tool = new PolylineLinkingTool();
-myDiagram.toolManager.linkingTool = tool;
 
 var entityTemplate = GO(go.Node, "Table", nodeStyle(),{
 	click:function(e, obj){
@@ -134,23 +132,21 @@ var palette = GO(go.Palette, 'myPaletteDiv', {
 	layout: GO(go.GridLayout, {spacing: new go.Size(10, 30)})
 });
 
-myDiagram.linkTemplate = GO(
-	go.Link,
-	{ reshapable: true, resegmentable: true},
-	{ adjusting: go.Link.Stretch},
-	new go.Binding("points", "points").makeTwoWay(),
-	GO(go.Shape, {strokeWidth: 1.5}),
-	GO(go.Shape, {toArrow: "OpenTriangle"})
-);
-
 myDiagram.nodeTemplateMap.add('entity', entityTemplate);
 myDiagram.nodeTemplateMap.add('structure', structureTemplate);
 myDiagram.nodeTemplateMap.add('process', processTemplate);
 modelContent = JSON.parse(modelJSON);
-myDiagram.model = new go.GraphLinksModel(modelContent["nodeDataArray"], modelContent["linkDataArray"]);
-myDiagram.model.linkFromPortIdProperty = "fromPort";  // necessary to remember portIds
-myDiagram.model.linkToPortIdProperty = "toPort";
 
+myDiagram.linkTemplate = GO(go.Link,
+	{reshapable: true, resegmentable: true},
+	{adjusting: go.Link.Stretch},
+	new go.Binding("points", "points").makeTwoWay(),
+	GO(go.Shape, {strokeWidth:1.5}),
+	GO(go.Shape, {toArrow: "OpenTriangle"})
+);
+myDiagram.model = new go.GraphLinksModel(modelContent["nodeDataArray"], modelContent["linkDataArray"]);
+myDiagram.model.linkFromPortIdProperty="fromPort";
+myDiagram.model.linkToPortIdProperty="toPort";
 palette.nodeTemplateMap = myDiagram.nodeTemplateMap;
 
 palette.model.nodeDataArray = [
