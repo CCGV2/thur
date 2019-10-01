@@ -17,8 +17,6 @@ router.get('/', checkNotLogin, function (req, res, next) {
 router.post('/', checkNotLogin, function(req, res, next) {
 	console.log(req.query);
 	var name = req.body.name;
-	var gender = req.body.gender;
-	var bio = req.body.bio;
 	var password = req.body.password;
 	var repassword = req.body.repassword;
 
@@ -26,9 +24,6 @@ router.post('/', checkNotLogin, function(req, res, next) {
 	try {
 		if (!(name.length >= 1 && name.length <= 10)) {
 			throw new Error('名字长度请限制为 1-10 个字符');
-		}
-		if (['m', 'f', 'x'].indexOf(gender) === -1) {
-			throw new Error('性别只能是 m、 f 或 x');
 		}
 		if (password.length < 6) {
 			throw new Error('密码过短');
@@ -47,8 +42,6 @@ router.post('/', checkNotLogin, function(req, res, next) {
 	var user = {
 		name: name,
 		password: password,
-		gender: gender,
-		bio: bio,
 		count: 0,
 		models: []
 	};

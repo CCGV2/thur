@@ -16,13 +16,15 @@ router.get('/', checkNotLogin, function(req, res, next) {
 router.post('/', checkNotLogin, function(req, res, next) {
 	var name = req.body.name;
 	var password = req.body.password;
+	console.log("start login");
+	console.log(name + password);
 	UserModel.findOne().byName(name).exec(function(err, user) {
-
+		console.log("after find");
+		console.log(user);
 		if (!user) {
 			req.flash('error', '用户不存在');
 			return res.redirect('back');
 		}
-		console.log("23123");
 		//检查密码
 		if (sha1(password) != user.password) {
 			req.flash('error', '用户名或密码错误');

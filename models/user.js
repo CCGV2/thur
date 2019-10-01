@@ -5,7 +5,6 @@ const Schema = mongoose.Schema;
 const userSchema = new Schema({
 	name: { type: 'string', required: true },
 	password: { type: 'string', required: true },
-	gender: { type: 'string', enum: ['m', 'f', 'x'], default: 'x' },
 	count: {type: 'number'},
 	models: [{ type: mongoose.Schema.Types.ObjectId }]
 });
