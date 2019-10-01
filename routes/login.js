@@ -14,8 +14,8 @@ router.get('/', checkNotLogin, function(req, res, next) {
 
 // POST /login 用户登录
 router.post('/', checkNotLogin, function(req, res, next) {
-	var name = req.fields.name;
-	var password = req.fields.password;
+	var name = req.body.name;
+	var password = req.body.password;
 	UserModel.findOne().byName(name).exec(function(err, user) {
 
 		if (!user) {

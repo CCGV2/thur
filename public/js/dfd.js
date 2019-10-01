@@ -65,9 +65,11 @@ function makePort(name, align, spot, output, input) {
 	});
 }
 
+var tool = new PolylineLinkingTool();
+
 var entityTemplate = GO(go.Node, "Table", nodeStyle(),{
 	click:function(e, obj){
-		inspector.inspectObject(obj.data);
+		//inspector.inspectObject(obj.data);
 	}},
         // the main object is a Panel that surrounds a TextBlock with a rectangular Shape
 	GO(go.Panel, "Auto", 
@@ -90,7 +92,7 @@ var entityTemplate = GO(go.Node, "Table", nodeStyle(),{
 );
 var processTemplate = GO(go.Node, "Table",{
 		click:function(e, obj){
-			inspector.inspectObject(obj.data);
+			//inspector.inspectObject(obj.data);
 		}
 	}, nodeStyle(), GO(go.Panel, "Auto", GO(go.Shape, "Circle", {
 		minSize: new go.Size(40, 40),
@@ -107,7 +109,9 @@ var processTemplate = GO(go.Node, "Table",{
 	makePort("L", go.Spot.Left, go.Spot.Left, true, true), 
 	makePort("R", go.Spot.Right, go.Spot.Right, true, true), 
 	makePort("B", go.Spot.Bottom, go.Spot.Bottom, true, true));
-var structureTemplate = GO(go.Node, "Table",{click:function(e, obj){inspector.inspectObject(obj.data);}},nodeStyle(), GO(go.Panel, "Auto", 
+var structureTemplate = GO(go.Node, "Table",{click:function(e, obj){
+	//	inspector.inspectObject(obj.data);
+	}},nodeStyle(), GO(go.Panel, "Auto", 
 		GO(go.Shape, {geometryString: "F M150 0 L0 0z M150 100 L0 100z"}, {
 		minSize: new go.Size(40, 40),
 		fill: null,
@@ -129,11 +133,21 @@ var palette = GO(go.Palette, 'myPaletteDiv', {
 	layout: GO(go.GridLayout, {spacing: new go.Size(10, 30)})
 });
 
+myDiagram.linkTemplate = GO(
+	go.Link,
+	{ reshapable: true, resegmentable: true},
+	new go.Binding("points", "points").makeTwoWay(),
+	GO(go.Shape, {strokeWidth: 1.5}),
+	GO(go.Shape, {toArrow: "OpenTriangle"})
+);
+
 myDiagram.nodeTemplateMap.add('entity', entityTemplate);
 myDiagram.nodeTemplateMap.add('structure', structureTemplate);
 myDiagram.nodeTemplateMap.add('process', processTemplate);
-
-myDiagram.model = new go.GraphLinksModel(modelJSON["nodes"], modelJSON["links"]);
+modelContent = JSON.parse(modelJSON);
+myDiagram.model = new go.GraphLinksModel(modelContent["nodeDataArray"], modelContent["linkDataArray"]);
+myDiagram.model.linkFromPortIdProperty = "fromPort";  // necessary to remember portIds
+myDiagram.model.linkToPortIdProperty = "toPort";
 
 palette.nodeTemplateMap = myDiagram.nodeTemplateMap;
 
@@ -153,12 +167,12 @@ function save() {
     var base_url = window.location.pathname;
     
 	$.ajax({
-		url: 'save',
-		data: {},
+		url: base_url + "/save",
+		data: {'data': dataJSON},
 		type: "POST",
-		dataType: "txt",
+		dataType: "JSON",
 		contentType: "application/x-www-form-urlencoded",
-		
+		timeout: 2000,
 		success: function(msg) {
 			alert(msg);
 		},
