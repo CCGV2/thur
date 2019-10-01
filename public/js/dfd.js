@@ -135,6 +135,9 @@ var palette = GO(go.Palette, 'myPaletteDiv', {
 myDiagram.nodeTemplateMap.add('entity', entityTemplate);
 myDiagram.nodeTemplateMap.add('structure', structureTemplate);
 myDiagram.nodeTemplateMap.add('process', processTemplate);
+if (modelJSON == '') {
+	modelJSON = 'null';
+}
 modelContent = JSON.parse(modelJSON);
 
 myDiagram.linkTemplate = GO(go.Link,
