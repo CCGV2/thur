@@ -14,8 +14,8 @@ exports.user_detail = (req, res) => {
 
 exports.user_new_diagram = (req, res) => {
 	var user = req.session.user;
-	var fileName = req.fields.filename;
-	var fileType = req.fields.filetype;
+	var fileName = req.body.filename;
+	var fileType = req.body.filetype;
 	console.log(fileName);
 	console.log(path.resolve(__dirname, '../public', './img/blank.jpg'));
 	console.log(fileType);

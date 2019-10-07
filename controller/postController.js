@@ -37,7 +37,7 @@ exports.save = (req, res) => {
 		console.log(req.session.user._id)
 		if (req.session.user._id != diagram.author) {
 			req.flash('error', '模型与作者不匹配');
-			return res.redirect('back');
+			return res.send("error");
 		}
 		diagram.content = content;
 		console.log("finded");
@@ -49,7 +49,7 @@ exports.save = (req, res) => {
 			}
 			console.log('success save');
 			req.flash('success', '保存成功');
-			return res.redirect('back');
+			return res.send("success");
 		})
 	})
 }

@@ -123,8 +123,6 @@ var structureTemplate = GO(go.Node, "Table",{click:function(e, obj){
 	}, new go.Binding("text", "文本").makeTwoWay())),
 	// three named ports, one on each side except the bottom, all input only:
 	makePort("T", go.Spot.Top, go.Spot.Top, true, true),
-	makePort("L", go.Spot.Left, go.Spot.Left, true, true), 
-	makePort("R", go.Spot.Right, go.Spot.Right, true, true), 
 	makePort("B", go.Spot.Bottom, go.Spot.Bottom, true, true));
 
 var palette = GO(go.Palette, 'myPaletteDiv', {
@@ -138,6 +136,7 @@ myDiagram.nodeTemplateMap.add('process', processTemplate);
 if (modelJSON == '') {
 	modelJSON = '{"nodeDataArray":[], "linkDataArray":[]}';
 }
+modelJSON = modelJSON.replace(/\n/g, '\\n');
 modelContent = JSON.parse(modelJSON);
 
 myDiagram.linkTemplate = GO(go.Link,
@@ -157,14 +156,60 @@ palette.model.nodeDataArray = [
 	{category: "structure", 文本: "数据存储"},
 	{category: "process", 文本: "加工"}
 ];
+var startTimeStamp = new Date().getTime();
+var parentLog;
+var logs = [];
+myDiagram.model.addChangedListener(function(evt) {
+	// ignore unimportant Transaction events
+	
+	// if (evt.change === go.ChangedEvent.Transaction) {
+	// 	if (evt.propertyName === "CommittingTransaction" || evt.modelChange === "SourceChanged")
+	// 		return;
+	// 	//var txn = evt.object;
+
+	// 	var changes = evt.toString();
+	// 	console.log(changes);
+	// 	//console.log(txn.changes);
+	// 	// txn.changes.each(function(c) {
+	// 	// 	console.log(c.change);
+	// 	// 	if (c.change === go.ChangedEvent.Property)
+	// 	// 		console.log(new Date().getTime() + " " + evt.propertyName + "  " + evt.oldValue + "  " + evt.newValue);
+	// 	// })
+	// }
+	// the codes up there is useless for this case but useful for other cases, so I want to keep them there
+	var changes = evt.toString();
+	if (changes[0] === '*') {
+		startTimeStamp = new Date().getTime();
+		var SpeLog = {
+			"content" : changes,
+			"level" : 'A',
+			"timeStamp": startTimeStamp,
+			"parentLog": startTimeStamp
+		};
+		logs.push(SpeLog);
+	} else {
+		var SpeLog = {
+			"content": changes,
+			"level": 'B',
+			"timeStamp": new Date().getTime(),
+			"parentLog": startTimeStamp
+		}
+		logs.push(SpeLog);
+	}
+	//if (txn === null) return;
+	
+	//console.log(changes);
+})
+
 function save() {
 	myDiagram.isModified = false;
 	var dataJSON = myDiagram.model.toJson();
-    dataJSON = dataJSON.replace(/[\'\\\/\b\f\n\r\t]/g, '');
-    dataJSON = dataJSON.replace(/[\"]/g, '\"');
+	dataJSON = dataJSON.replace(/\r\n/g, '');
+	dataJSON = dataJSON.replace(/\n/g, '');
+	dataJSON = dataJSON.replace(/\r/g, '');
+    // dataJSON = dataJSON.replace(/[\'\\\/\b\f\n\r\t]/g, '');
+    // dataJSON = dataJSON.replace(/[\"]/g, '\"');
     var t = typeof dataJSON;
-    console.log(t);
-    console.log(dataJSON);
     var base_url = window.location.pathname;
     
 	$.ajax({
@@ -173,12 +218,19 @@ function save() {
 		type: "POST",
 		dataType: "JSON",
 		contentType: "application/x-www-form-urlencoded",
-		timeout: 2000,
-		success: function(msg) {
-			alert(msg);
-		},
-		error: function(msg) {
-			console.log(msg);
-		}
+		timeout: 2000
+	})
+	var logJSON = JSON.stringify(logs);
+	//console.log(logJSON);
+	$.ajax({
+		url: base_url + "/upload",
+		data: {'data': logJSON},
+		type: "POST",
+		dataType: "JSON",
+		contentType: "application/x-www-form-urlencoded",
+		timeout: 2000
+		
+	}).done(function(response){
+		console.log(response.responseText);
 	})
 }
