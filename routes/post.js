@@ -14,9 +14,9 @@ router.post('/save', function(req, res, next) {
 
 router.post('/:postID/save', post_controller.save);
 
-router.post('/:postID/remove', checkLogin, function(req, res, next) {
-	res.send(req.flash());
-});
+router.post('/:postID/upload', post_controller.upload);
+
+router.get('/:postID/remove', checkLogin, post_controller.remove);
 
 
 module.exports = router;

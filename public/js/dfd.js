@@ -221,7 +221,7 @@ function save() {
 		timeout: 2000
 	})
 	var logJSON = JSON.stringify(logs);
-	//console.log(logJSON);
+	
 	$.ajax({
 		url: base_url + "/upload",
 		data: {'data': logJSON},
@@ -231,6 +231,9 @@ function save() {
 		timeout: 2000
 		
 	}).done(function(response){
+		if (response.success){
+			console.log("response");
+		}
 		console.log(response.responseText);
 	})
 }

@@ -1,5 +1,6 @@
 const User = require('../models/user');
 const Diagram = require('../models/diagram');
+const Log = require('../models/log');
 exports.index = (req, res, next) => {
 	var id = req.params.postID;
 	console.log("post index");
@@ -22,8 +23,6 @@ exports.index = (req, res, next) => {
 
 exports.save = (req, res) => {
 	var id = req.params.postID;
-	console.log("start saving");
-	console.log(req.body.data);
 	var content = req.body.data;
 	console.log(content);
 	Diagram.findOne({_id:id}).exec(function(err, diagram) {
@@ -52,4 +51,46 @@ exports.save = (req, res) => {
 			return res.send("success");
 		})
 	})
+}
+
+exports.remove = (req, res) => {
+	var id = req.params.postID;
+	console.log("remove");
+	console.log(id);
+	console.log(req.session.user.models);
+	var index = -1;
+	for (var i = 0; i < req.session.user.models.length; i++){
+		if (req.session.user.models[i]._id === id){
+			index = i;
+			break;
+		}
+	}
+	if (index > -1) {
+		req.session.user.models.splice(index, 1);
+	}
+	console.log(req.session.user.models);
+	req.session.user.count--;
+	User.updateOne({"_id":req.session.user._id}, {$pull:{models:id}, $set:{count:req.session.user.count}}, function(err){
+		if (err) {
+			console.log(err);
+		}
+		return res.redirect(`/home/${req.session.user._id}`);
+	});	
+}
+
+exports.upload = (req, res) => {
+	var id = req.params.postID;
+	var content = req.body.data;
+	var logDiagram = id;
+	var logAuthor = req.session.user._id;
+	var doc = ({
+		author: logAuthor,
+		model: logDiagram,
+		content: content
+	})
+	Log.create(doc, function(err, docs){
+		if (err) return res.json({err: err});
+		else return res.json({success: true});
+	})
+
 }

@@ -6,7 +6,7 @@ const userSchema = new Schema({
 	name: { type: 'string', required: true },
 	password: { type: 'string', required: true },
 	count: {type: 'number'},
-	models: [{ type: mongoose.Schema.Types.ObjectId }]
+	models: [{ type: mongoose.Schema.Types.ObjectId, ref:'diagram' }]
 });
 userSchema.index({ name: 1 }, { unique: true })
 

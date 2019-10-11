@@ -1,29 +1,48 @@
 const User = require('../models/user');
 const Diagram = require('../models/diagram');
+const dfd = require('../tools/dfd');
 var path = require('path');
 var fs = require('fs');
 var publicPath = path.resolve(__dirname, '../public');
+
+function makeImg(element, index, array){
+	fs.exists(path.resolve(__dirname, '../public', './img/' + element._id + '.png'), function(exist){
+		if (!exist){
+			console.log("不存在");
+			dfd.makeImg(element);
+		}else{
+			return true;
+		}
+	});
+}
 
 exports.index = (req, res) => {
 	res.render('home');
 }
 
 exports.user_detail = (req, res) => {
-	res.render('user');
+	var user = req.session.user;
+	User.findOne({"_id": user._id}).populate({path: 'models', select:'content title'})
+	.exec(function(err, target){
+		if (err) {
+			console.log(err);
+		}
+		delete target.password;
+		target.models.forEach(makeImg);
+		req.session.user = target;
+		res.render('user');
+	});
 }
 
 exports.user_new_diagram = (req, res) => {
 	var user = req.session.user;
 	var fileName = req.body.filename;
 	var fileType = req.body.filetype;
-	console.log(fileName);
-	console.log(path.resolve(__dirname, '../public', './img/blank.jpg'));
-	console.log(fileType);
 	var file = {
 		author : user._id,
 		title: fileName,
 		type: fileType,
-		content: ""
+		content: '{"nodeDataArray":[], "linkDataArray":[]}'
 	};
 	Diagram.create(file, function(err, file) {
 		if (err) {
@@ -38,25 +57,15 @@ exports.user_new_diagram = (req, res) => {
 			function(error, success) {
 				if (error) {
 					console.log(error);
-					return res.redirect(`/home/${user._id}`);
 				} else {
 
 					user.count += 1;
 					user.models.push(file._id);
 					req.session.user = success;
 					req.session.models = success.models;
-					console.log('req.session.user:');
-					console.log(req.session.user);
-					console.log('req.session.models:');
-					console.log(req.session.models);
-					fs.copyFile(path.resolve(__dirname, '../public', './img/blank.jpg'), 
-						path.resolve(__dirname, '../public', './img/' + file._id + '.jpg'), 
-						function(err) {
-							console.log(err);
-						});
-					console.log("success");
-					return res.redirect(`/home/${user._id}`);
 				}
+				user.models.forEach(makeImg);
+				return res.redirect(`/home/${user._id}`);
 			})
 	})
 	//return res.redirect(`/home/${user._id}`);

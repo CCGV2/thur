@@ -3,9 +3,9 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const logSchema = new Schema({
-	author: { type: Mongolass.Types.ObjectId },
-	model: { type: Mongolass.Types.ObjectId },
-	content: { type: 'string' }
-});
+	content : {type: 'string'},
+	author: { type: mongoose.Types.ObjectId, ref:'user' },
+	model: { type: mongoose.Types.ObjectId, ref:'diagram' }
+},{timestamps:true});
 
 module.exports = mongoose.model('log', logSchema);
