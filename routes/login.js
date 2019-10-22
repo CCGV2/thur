@@ -31,7 +31,7 @@ router.post('/', checkNotLogin, function(req, res, next) {
 		//检查密码
 		if (sha1(password) != user.password) {
 			req.flash('error', '用户名或密码错误');
-			return res.redirect('login');
+			return res.redirect('back');
 		}
 		console.log("登陆成功");
 		req.flash('success', '登陆成功');

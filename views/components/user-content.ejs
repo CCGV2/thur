@@ -1,20 +1,27 @@
 <div class="user-content">
 	<div class="left-menu div-inline">
-		<p style="margin-top: 20px;">我的文件</p>
-		<p class="new-file" data-title="新建"></p>
+		<p style="margin-top: 20px;">功能</p>
+		<p class="new-file" data-title="新建模型"></p>
+		<br>
+		<br>
+		<p>其他功能正在赶来的路上！</p>
 	</div>
 	<div class="right-diagrams div-inline">
 		<h5 style="text-align: left; margin-top: 10px; height: 20px;">我的文件</h5>
 		<div class="file-list ui horizontal five columns grid">
 			<% for (var i = 0; i < user.models.length; i++) { %>
 				<div class="column">
-					<div class="ui small rounded image">
-						<a href="/post/<%= user.models[i]._id %>">
-							<img style="background-color: WHITE" src="/img/<%= user.models[i]._id %>.png">
-						</a>
+					<div class="ui fluid card">
+						<div class="ui small rounded image">
+							<a href="/post/<%= user.models[i]._id %>">
+								<img style="background-color: WHITE" class="ui small rounded image" src="/img/<%= user.models[i]._id %>.png">
+							</a>
 
-						<a href="/post/<%= user.models[i]._id %>/remove" class="ui circular floating red label" style="max-width: 20px"><i class="trash alternate icon" style="margin-left: 1px"></i></a>
+						</div>
+						<a href="/post/<%= user.models[i]._id %>/remove" class="ui circular floating red label" style="max-width: 20px" onclick="return confirm('确定要删除该模型吗？')"><i class="trash alternate icon" style="margin-left: 1px"></i></a>
+						<div class="content"><%= user.models[i].title %></div>
 					</div>
+					
 					
 				</div>
 			<% } %>
@@ -85,7 +92,6 @@
 	//新建按钮动画
 	const docStyle = document.documentElement.style
     const aElem = document.querySelector('.new-file')
-    console.log(aElem);
     const boundingClientRect = aElem.getBoundingClientRect()
 
     aElem.onmousemove = function(e) {

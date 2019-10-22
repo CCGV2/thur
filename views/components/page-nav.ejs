@@ -4,7 +4,13 @@
 <div class="ui sixteen column" style="background-color: WHITE">
 	
 		<div class="four wide column">
-			<a href="/home"><img style="height: 50px; margin: 5px 0px" src="/img/logo.png"></a>
+			<img style="height: 50px; margin: 5px 0px" src="/img/logo.png">
 		</div>
-		<div class="ui primary button save-button" onclick="save()">保存</div>
+		<div id="save-info">更改已保存</div>
+		<div class="ui primary button save-button" id="save-button" onclick="save()">保存</div>
+		<a href="/home/<%= user._id %>"><div class="ui basic button" id="back-button" tabindex="0">
+			<div class="content">
+				返回个人主页
+			</div>
+		</div></a>
 </div>

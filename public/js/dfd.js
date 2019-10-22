@@ -11,6 +11,25 @@ var myDiagram = GO(go.Diagram, "myDiagramDiv",{
 	scrollsPageOnFocus: false,
 	"undoManager.isEnabled": true, // enable undo & redo
 });
+
+myDiagram.toolManager.mouseDownTools.add(GO(LinkShiftingTool));
+
+myDiagram.addDiagramListener("Modified", function(e){
+	var button = document.getElementById("save-button");
+	var info = document.getElementById("save-info");
+	if (button) button.disabled = !myDiagram.isModified;
+	if (myDiagram.isModified) {
+		if (info.innerHTML=="更改已保存") {
+			info.innerHTML = "更改未保存";
+			info.style.color = "red";
+		}
+	} else {
+		if (info.innerHTML=="更改未保存"){
+			info.innerHTML = "更改已保存";
+			info.style.color = "black";
+		}
+	}
+})
 function showLinkLabel(e) {
 	var label = e.subject.findObject("LABEL");
 	if (label !== null) label.visible = (e.subject.fromNode.data.category === "Conditional");
@@ -66,51 +85,62 @@ function makePort(name, align, spot, output, input) {
 }
 
 
-var entityTemplate = GO(go.Node, "Table", nodeStyle(),{
+var entityTemplate = GO(go.Node, "Auto", nodeStyle(),{
 	click:function(e, obj){
 		//inspector.inspectObject(obj.data);
 	}},
         // the main object is a Panel that surrounds a TextBlock with a rectangular Shape
+    {
+    	fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
+        fromLinkable: true, toLinkable: true,
+        locationSpot: go.Spot.Center
+    },
 	GO(go.Panel, "Auto", 
 		GO(go.Shape, "Rectangle",
-		{ fill: null, strokeWidth: 2, stroke: "black"},
+		{ fill: "white", strokeWidth: 2, stroke: "black"},
 		new go.Binding("figure", "figure")),
 		GO(go.TextBlock, textStyle(),{
 			margin: 8,
 			maxSize: new go.Size(160, NaN),
 			wrap: go.TextBlock.WrapFit,
-			editable: true
+			editable: true,
+			fromLinkable:false,
+			toLinkable:false
 		},
-		new go.Binding("text", "文本").makeTwoWay()
-	)),
-	// four named ports, one on each side:
-	makePort("T", go.Spot.Top, go.Spot.TopSide, true, true), 
-	makePort("L", go.Spot.Left, go.Spot.LeftSide, true, true), 
-	makePort("R", go.Spot.Right, go.Spot.RightSide, true, true), 
-	makePort("B", go.Spot.Bottom, go.Spot.BottomSide, true, true)
+		new go.Binding("text", "文本").makeTwoWay(),
+
+	))
 );
-var processTemplate = GO(go.Node, "Table",{
+var processTemplate = GO(go.Node, "Auto",{
 		click:function(e, obj){
 			//inspector.inspectObject(obj.data);
 		}
-	}, nodeStyle(), GO(go.Panel, "Auto", GO(go.Shape, "Circle", {
+	}, nodeStyle(),
+	{
+    	fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
+        fromLinkable: true, toLinkable: true,
+        locationSpot: go.Spot.Center
+    }, GO(go.Panel, "Auto", GO(go.Shape, "Circle", {
 		minSize: new go.Size(40, 40),
-		fill: null,
+		fill: "white",
 		strokeWidth: 2
 	}), GO(go.TextBlock, textStyle(), {
 		margin: 8,
 		maxSize: new go.Size(160, NaN),
 		wrap: go.TextBlock.WrapFit,
-		editable: true
-	},new go.Binding("text", "文本").makeTwoWay())),
-	// three named ports, one on each side except the top, all output only:
-	makePort("T", go.Spot.Top, go.Spot.Top, true, true),
-	makePort("L", go.Spot.Left, go.Spot.Left, true, true), 
-	makePort("R", go.Spot.Right, go.Spot.Right, true, true), 
-	makePort("B", go.Spot.Bottom, go.Spot.Bottom, true, true));
-var structureTemplate = GO(go.Node, "Table",{click:function(e, obj){
+		editable: true,
+		fromLinkable:false,
+		toLinkable:false
+	},new go.Binding("text", "文本").makeTwoWay())))
+	// three named ports, one on each side except the top, all output only:;
+var structureTemplate = GO(go.Node, "Auto",{click:function(e, obj){
 	//	inspector.inspectObject(obj.data);
-	}},nodeStyle(), GO(go.Panel, "Auto", 
+	}},nodeStyle(), {
+    	fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
+        fromLinkable: true, toLinkable: true,
+        locationSpot: go.Spot.Center
+    }, 
+	GO(go.Panel, "Auto", 
 		GO(go.Shape, {geometryString: "F M150 0 L0 0z M150 100 L0 100z"}, {
 		minSize: new go.Size(40, 40),
 		fill: null,
@@ -119,11 +149,11 @@ var structureTemplate = GO(go.Node, "Table",{click:function(e, obj){
 		margin: 8,
 		maxSize: new go.Size(160, NaN),
 		wrap: go.TextBlock.WrapFit,
-		editable: true
-	}, new go.Binding("text", "文本").makeTwoWay())),
+		editable: true,
+		fromLinkable:false,
+		toLinkable:false
+	}, new go.Binding("text", "文本").makeTwoWay())));
 	// three named ports, one on each side except the bottom, all input only:
-	makePort("T", go.Spot.Top, go.Spot.Top, true, true),
-	makePort("B", go.Spot.Bottom, go.Spot.Bottom, true, true));
 
 var palette = GO(go.Palette, 'myPaletteDiv', {
 	scrollsPageOnFocus: false,
@@ -143,6 +173,8 @@ myDiagram.linkTemplate = GO(go.Link,
 	{reshapable: true, resegmentable: true},
 	{adjusting: go.Link.Stretch},
 	new go.Binding("points", "points").makeTwoWay(),
+	new go.Binding("fromSpot", "fromSpot", go.Spot.parse).makeTwoWay(go.Spot.stringify),
+    new go.Binding("toSpot", "toSpot", go.Spot.parse).makeTwoWay(go.Spot.stringify),
 	GO(go.Shape, {strokeWidth:1.5}),
 	GO(go.Shape, {toArrow: "OpenTriangle"})
 );
@@ -196,13 +228,13 @@ myDiagram.model.addChangedListener(function(evt) {
 		}
 		logs.push(SpeLog);
 	}
-	//if (txn === null) return;
-	
-	//console.log(changes);
 })
 
+setInterval(save, 3000);
 function save() {
-	myDiagram.isModified = false;
+	if (!myDiagram.isModified){
+		return ;
+	}
 	var dataJSON = myDiagram.model.toJson();
 	dataJSON = dataJSON.replace(/\r\n/g, '');
 	dataJSON = dataJSON.replace(/\n/g, '');
@@ -218,7 +250,13 @@ function save() {
 		type: "POST",
 		dataType: "JSON",
 		contentType: "application/x-www-form-urlencoded",
-		timeout: 2000
+		timeout: 2000,
+		success:function(response){
+			console.log("success save");
+			console.log(response);
+			myDiagram.isModified = false;
+
+		}
 	})
 	var logJSON = JSON.stringify(logs);
 	
@@ -228,12 +266,10 @@ function save() {
 		type: "POST",
 		dataType: "JSON",
 		contentType: "application/x-www-form-urlencoded",
-		timeout: 2000
-		
-	}).done(function(response){
-		if (response.success){
-			console.log("response");
+		timeout: 2000,
+		success: function(response){
+			logJSON = [];
+			//console.log(response);
 		}
-		console.log(response.responseText);
 	})
 }

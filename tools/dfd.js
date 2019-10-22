@@ -11,9 +11,10 @@ const parseDataUrl = (dataUrl) => {
 };
 
 
-exports.makeImg = async function makeImg(diagram){
-	console.log("makeImg");
+exports.makeImg = async function makeImg(diagram, callback){
+	console.log("makeImg diagram:");
 	console.log(diagram);
+	console.log(diagram.content);
 	const browser = await puppeteer.launch();
 	const page = await browser.newPage();
 
@@ -24,6 +25,7 @@ exports.makeImg = async function makeImg(diagram){
 	page.setContent('<div id="myDiagramDiv" style="border: solid 1px black; width:1600px; height:1200px"></div>');
 
 	const imageData = await page.evaluate((diagram) =>{
+		console.log('NMSL');
 		var GO = go.GraphObject.make;
 		var myDiagram = GO(go.Diagram, "myDiagramDiv",{
 			initialContentAlignment: go.Spot.Center,
@@ -169,6 +171,7 @@ exports.makeImg = async function makeImg(diagram){
 		if (modelJSON == '') {
 			modelJSON = '{"nodeDataArray":[], "linkDataArray":[]}';
 		}
+		console.log(modelJSON);
 		modelJSON = modelJSON.replace(/\n/g, '\\n');
 		var modelContent = JSON.parse(modelJSON);
 
@@ -179,5 +182,8 @@ exports.makeImg = async function makeImg(diagram){
 	const {buffer} = parseDataUrl(imageData);
 	var targetPath = path.resolve(__dirname, '../public/img/' + diagram._id + '.png');
   	fs.writeFileSync(targetPath, buffer, 'base64');
+  	if (typeof callback === 'function'){
+  		callback();
+  	}
 	await browser.close();
 }

@@ -1,7 +1,8 @@
 const User = require('../models/user');
 const Diagram = require('../models/diagram');
 const Log = require('../models/log');
-exports.index = (req, res, next) => {
+const dfd = require('../tools/dfd');
+exports.index = (req, res) => {
 	var id = req.params.postID;
 	console.log("post index");
 	Diagram.findOne({_id:id}).exec(function(err, diagram) {
@@ -15,13 +16,12 @@ exports.index = (req, res, next) => {
 		}
 		req.session.content = diagram.content;
 		req.session.page = diagram.type;
-		console.log(diagram.type);
-		console.log(diagram.type + diagram.content);
-		return res.render(diagram.type);
+		return res.render(diagram.type, {content:diagram.content});
 	})
 };
 
 exports.save = (req, res) => {
+	console.log("start to save");
 	var id = req.params.postID;
 	var content = req.body.data;
 	console.log(content);
@@ -39,16 +39,18 @@ exports.save = (req, res) => {
 			return res.send("error");
 		}
 		diagram.content = content;
-		console.log("finded");
+
 		Diagram.findByIdAndUpdate(id, {
 			$set:{content:content}
 		}).exec(function(err) {
 			if (err) {
 				console.log(err);
 			}
+			dfd.makeImg(diagram, function(){});
 			console.log('success save');
 			req.flash('success', '保存成功');
-			return res.send("success");
+			req.session.content = diagram.content;
+			return res.json({success:true});
 		})
 	})
 }
@@ -66,19 +68,25 @@ exports.remove = (req, res) => {
 		}
 	}
 	if (index > -1) {
+		console.log(req.session.user.models);
 		req.session.user.models.splice(index, 1);
+		console.log(req.session.user.models);
+		req.session.user.count--;
+		User.updateOne({"_id":req.session.user._id}, {$pull:{models:id}, $set:{count:req.session.user.count}}, function(err){
+			if (err) {
+				console.log(err);
+			}
+			return res.redirect(`/home/${req.session.user._id}`);
+		});	
+	}else{
+		return res.redirect(`/home/${req.session.user._id}`);
 	}
 	console.log(req.session.user.models);
-	req.session.user.count--;
-	User.updateOne({"_id":req.session.user._id}, {$pull:{models:id}, $set:{count:req.session.user.count}}, function(err){
-		if (err) {
-			console.log(err);
-		}
-		return res.redirect(`/home/${req.session.user._id}`);
-	});	
+	
 }
 
 exports.upload = (req, res) => {
+	console.log("upload");
 	var id = req.params.postID;
 	var content = req.body.data;
 	var logDiagram = id;

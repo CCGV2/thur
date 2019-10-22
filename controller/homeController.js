@@ -27,6 +27,7 @@ exports.user_detail = (req, res) => {
 		if (err) {
 			console.log(err);
 		}
+		console.log(target);
 		delete target.password;
 		target.models.forEach(makeImg);
 		req.session.user = target;
@@ -50,23 +51,32 @@ exports.user_new_diagram = (req, res) => {
 			return res.redirect('back');
 		}
 		console.log('创建成功');
-		User.findByIdAndUpdate(
-			user._id,
-			{$push: {models: file._id}, $set: {count: user.count + 1}},
-			{new: true},
-			function(error, success) {
-				if (error) {
-					console.log(error);
-				} else {
+		fs.exists(path.resolve(__dirname, '../public', './img/' + file._id + '.png'), function(exist){
+			if (!exist){
+				console.log("不存在");
+				console.log("nmsl");
+				dfd.makeImg(file, function(){
+					User.findByIdAndUpdate(
+					user._id,
+					{$push: {models: file._id}, $set: {count: user.count + 1}},
+					{new: true}
+					).populate({path: 'models', select:'content title'}).exec(
+					function(error, success) {
+						if (error) {
+							console.log(error);
+						} else {
 
-					user.count += 1;
-					user.models.push(file._id);
-					req.session.user = success;
-					req.session.models = success.models;
-				}
-				user.models.forEach(makeImg);
-				return res.redirect(`/home/${user._id}`);
-			})
+							user.count += 1;
+							user.models.push(file._id);
+							req.session.user = success;
+							req.session.models = success.models;
+						}
+						return res.redirect('back');
+					})
+				});
+			}
+		});
+		
 	})
 	//return res.redirect(`/home/${user._id}`);
 }

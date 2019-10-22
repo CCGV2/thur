@@ -7,10 +7,6 @@ const post_controller = require('../controller/postController');
 
 router.get('/:postID', post_controller.index);
 
-router.post('/save', function(req, res, next) {
-	console.log('nmsl');
-	next();
-})
 
 router.post('/:postID/save', post_controller.save);
 
