@@ -97,7 +97,7 @@ var entityTemplate = GO(go.Node, "Auto", nodeStyle(),{
     },
 	GO(go.Panel, "Auto", 
 		GO(go.Shape, "Rectangle",
-		{ fill: "white", strokeWidth: 2, stroke: "black"},
+		{ fill: "transparent", strokeWidth: 2, stroke: "black"},
 		new go.Binding("figure", "figure")),
 		GO(go.TextBlock, textStyle(),{
 			margin: 8,
@@ -122,37 +122,76 @@ var processTemplate = GO(go.Node, "Auto",{
         locationSpot: go.Spot.Center
     }, GO(go.Panel, "Auto", GO(go.Shape, "Circle", {
 		minSize: new go.Size(40, 40),
-		fill: "white",
+		fill: "transparent",
 		strokeWidth: 2
 	}), GO(go.TextBlock, textStyle(), {
 		margin: 8,
-		maxSize: new go.Size(160, NaN),
+		
 		wrap: go.TextBlock.WrapFit,
 		editable: true,
 		fromLinkable:false,
 		toLinkable:false
 	},new go.Binding("text", "文本").makeTwoWay())))
 	// three named ports, one on each side except the top, all output only:;
-var structureTemplate = GO(go.Node, "Auto",{click:function(e, obj){
-	//	inspector.inspectObject(obj.data);
-	}},nodeStyle(), {
-    	fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
+// var structureTemplate = GO(go.Node, "Auto",{click:function(e, obj){
+// 	//	inspector.inspectObject(obj.data);
+// 	}},nodeStyle(), {
+//     	fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
+//         fromLinkable: true, toLinkable: true,
+//         locationSpot: go.Spot.Center
+//     }, GO(go.Panel, "Vertical", {margin: 5}, 
+// 	GO(go.Panel, "Auto", 
+// 		GO(go.Shape, "LineH", {
+// 			minSize: new go.Size(40, 40),
+// 			fill: "black",
+// 			strokeWidth: 2
+// 		})),
+// 	GO(go.Panel, "Auto", 
+// 		GO(go.Shape, "Rectangle", {
+// 			minSize: new go.Size(40, 40),
+// 			file: "whitle",
+// 			strokeWidth: 0
+// 		}),
+// 		GO(go.TextBlock, textStyle(),{
+// 			margin: 8,
+// 			maxSize: new go.Size(160, NaN),
+// 			wrap: go.TextBlock.WrapFit,
+// 			editable: true,
+// 			fromLinkable:false,
+// 			toLinkable:false
+// 		}, new go.Binding("text", "文本").makeTwoWay())),
+// 	GO(go.Panel, "Auto", 
+// 		GO(go.Shape, "LineH", {
+// 			minSize: new go.Size(40, 40),
+// 			fill: "black",
+// 			strokeWidth: 2
+// 		})))
+// 	);
+	  var structureTemplate = GO(go.Node, "Auto",nodeStyle(),{
+	  	fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
         fromLinkable: true, toLinkable: true,
         locationSpot: go.Spot.Center
-    }, 
-	GO(go.Panel, "Auto", 
-		GO(go.Shape, {geometryString: "F M150 0 L0 0z M150 100 L0 100z"}, {
-		minSize: new go.Size(40, 40),
-		fill: null,
-		strokeWidth: 2
-	}), GO(go.TextBlock, textStyle(),{
-		margin: 8,
-		maxSize: new go.Size(160, NaN),
-		wrap: go.TextBlock.WrapFit,
-		editable: true,
-		fromLinkable:false,
-		toLinkable:false
-	}, new go.Binding("text", "文本").makeTwoWay())));
+	  },
+        GO(go.Panel, "Vertical",
+          { margin: 0 },
+
+          
+            GO(go.Shape, "MinusLine", { height:3, strokeWidth: 3, stroke: 'black', stretch: go.GraphObject.Fill} ),
+            
+
+          GO(go.Panel, "Auto",
+            GO(go.Shape, "Rectangle", { strokeWidth: 0, fill: 'transparent', stretch: go.GraphObject.Fill}),
+            GO(go.TextBlock, "",
+              { margin: 8 ,
+              fromLinkable:false,
+			  toLinkable:false},
+              new go.Binding("text", "文本").makeTwoWay())
+            ),
+
+            GO(go.Shape, "MinusLine", { height: 3, strokeWidth: 3, stroke: 'black', stretch: go.GraphObject.Fill} )
+          
+        ) // end outer panel
+      ); // end node
 	// three named ports, one on each side except the bottom, all input only:
 
 var palette = GO(go.Palette, 'myPaletteDiv', {
