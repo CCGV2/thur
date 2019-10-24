@@ -13,6 +13,7 @@ var myDiagram = GO(go.Diagram, "myDiagramDiv",{
 });
 
 myDiagram.toolManager.mouseDownTools.add(GO(LinkShiftingTool));
+myDiagram.toolManager.mouseMoveTools.insertAt(0, new LinkLabelDraggingTool());
 
 myDiagram.addDiagramListener("Modified", function(e){
 	var button = document.getElementById("save-button");
@@ -217,7 +218,18 @@ myDiagram.linkTemplate = GO(go.Link,
 	new go.Binding("fromSpot", "fromSpot", go.Spot.parse).makeTwoWay(go.Spot.stringify),
     new go.Binding("toSpot", "toSpot", go.Spot.parse).makeTwoWay(go.Spot.stringify),
 	GO(go.Shape, {strokeWidth:1.5}),
-	GO(go.Shape, {toArrow: "OpenTriangle"})
+	GO(go.Shape, {toArrow: "OpenTriangle"}),
+	GO(go.Panel, "Auto", 
+		{cursor: "move"},
+		GO(go.Shape, {
+			fill: GO(go.Brush, "Radial", {0: "rgb(240,240,240)", 0.3: "rgb(240, 240, 240)", 1: "rgb(240,240,240,0)"}),
+			stroke: null			
+		}), 
+		GO(go.TextBlock, "数据流", 
+		textStyle(), {
+			editable: true
+		}, new go.Binding("text", "文本").makeTwoWay()),
+		new go.Binding("segmentOffset", "segmentOffset", go.Point.parse).makeTwoWay(go.Point.stringify))
 );
 myDiagram.model = new go.GraphLinksModel(modelContent["nodeDataArray"], modelContent["linkDataArray"]);
 myDiagram.model.linkFromPortIdProperty="fromPort";
