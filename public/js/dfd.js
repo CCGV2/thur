@@ -184,6 +184,8 @@ var processTemplate = GO(go.Node, "Auto",{
             GO(go.TextBlock, textStyle(),
               { margin: 8 ,
               fromLinkable:false,
+              wrap: go.TextBlock.WrapFit,
+				editable: true,
 			  toLinkable:false},
               new go.Binding("text", "文本").makeTwoWay())
             ),
