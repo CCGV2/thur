@@ -181,7 +181,7 @@ var processTemplate = GO(go.Node, "Auto",{
 
           GO(go.Panel, "Auto",
             GO(go.Shape, "Rectangle", { strokeWidth: 0, fill: 'transparent', stretch: go.GraphObject.Fill}),
-            GO(go.TextBlock, "",
+            GO(go.TextBlock, textStyle(),
               { margin: 8 ,
               fromLinkable:false,
 			  toLinkable:false},

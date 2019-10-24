@@ -39,7 +39,7 @@
 			<h4 class="ui dividing header">新建模型</h4>
 			<div class="field">
 				<label>文件名</label>
-				<input type="text" name="filename" placeholder="文件名">
+				<input type="text" name="filename" placeholder="请输入长度为1~20的文件名">
 			</div>
 			<div class="field">
 				<label>模型类型</label>
@@ -51,12 +51,12 @@
 						<div class="item" data-value="dfd">
 							数据流图
 						</div>
-						<div class="item" data-value="uml">
+						<!-- <div class="item" data-value="uml">
 							UML类图
 						</div>
 						<div class="item" data-value="ucd">
 							用例图
-						</div>
+						</div> -->
 					</div>
 				</div>
 			</div>
@@ -70,22 +70,23 @@
 <script type="text/javascript">
 	$('.ui.form')
 		.form({
-			fields: {
-				filename: {
-					identifier: 'filename',
-					rules: [{
-						type: 'empty',
-						prompt: '请输入文件名'
-					}]
-				},
-				filetype: {
-					identifier: 'filetype',
-					rules: [{
-						type: 'empty',
-						prompt: '请选择类型'
-					}]
-				}
+			filename: {
+				identifier: 'filename',
+				rules: [{
+					type: 'empty',
+					prompt: '请输入文件名'
+				}, {
+					type: 'maxLength[20]',
+					prompt: '文件名过长'
+				}]
 			},
+			filetype: {
+				identifier: 'filetype',
+				rules: [{
+					type: 'empty',
+					prompt: '请选择类型'
+				}]
+			}
 		});
 </script>
 <script type="text/javascript">
