@@ -96,6 +96,7 @@ exports.upload = (req, res) => {
 		model: logDiagram,
 		content: content
 	})
+	console.log(content);
 	Log.create(doc, function(err, docs){
 		if (err) return res.json({err: err});
 		else return res.json({success: true});

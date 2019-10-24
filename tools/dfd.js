@@ -19,8 +19,12 @@ exports.makeImg = async function makeImg(diagram, callback){
 	const page = await browser.newPage();
 
 	await page.addScriptTag({
-		path: 'public/release/go-debug.js',
-		path: 'public/release/LinkLabelDraggingTool.js',
+		path: 'public/release/go-debug.js'
+	});
+	await page.addScriptTag({
+		path: 'public/release/LinkLabelDraggingTool.js'
+	});
+	await page.addScriptTag({
 		path: 'public/release/LinkShiftingTool.js'
 	});
 
@@ -30,8 +34,6 @@ exports.makeImg = async function makeImg(diagram, callback){
 		console.log('NMSL');
 		var GO = go.GraphObject.make;
 		
-		myDiagram.toolManager.mouseDownTools.add(GO(LinkShiftingTool));
-		myDiagram.toolManager.mouseMoveTools.insertAt(0, new LinkLabelDraggingTool());
 
 		var myDiagram = GO(go.Diagram, "myDiagramDiv",{
 			initialContentAlignment: go.Spot.Center,
@@ -43,6 +45,9 @@ exports.makeImg = async function makeImg(diagram, callback){
 			scrollsPageOnFocus: false,
 			"undoManager.isEnabled": true, // enable undo & redo
 		});
+
+		myDiagram.toolManager.mouseDownTools.add(GO(LinkShiftingTool));
+		myDiagram.toolManager.mouseMoveTools.insertAt(0, new LinkLabelDraggingTool());
 		function showLinkLabel(e) {
 			var label = e.subject.findObject("LABEL");
 			if (label !== null) label.visible = (e.subject.fromNode.data.category === "Conditional");
@@ -209,20 +214,9 @@ exports.makeImg = async function makeImg(diagram, callback){
 		      ); // end node
 			// three named ports, one on each side except the bottom, all input only:
 
-		var palette = GO(go.Palette, 'myPaletteDiv', {
-			scrollsPageOnFocus: false,
-			layout: GO(go.GridLayout, {spacing: new go.Size(10, 30)})
-		});
-
 		myDiagram.nodeTemplateMap.add('entity', entityTemplate);
 		myDiagram.nodeTemplateMap.add('structure', structureTemplate);
 		myDiagram.nodeTemplateMap.add('process', processTemplate);
-		if (modelJSON == '') {
-			modelJSON = '{"nodeDataArray":[], "linkDataArray":[]}';
-		}
-		modelJSON = modelJSON.replace(/\n/g, '\\n');
-		modelContent = JSON.parse(modelJSON);
-
 		myDiagram.linkTemplate = GO(go.Link,
 			{reshapable: true, resegmentable: true},
 			{adjusting: go.Link.Stretch},
@@ -243,7 +237,6 @@ exports.makeImg = async function makeImg(diagram, callback){
 				}, new go.Binding("text", "文本").makeTwoWay()),
 				new go.Binding("segmentOffset", "segmentOffset", go.Point.parse).makeTwoWay(go.Point.stringify))
 		);
-		myDiagram.model = new go.GraphLinksModel(modelContent["nodeDataArray"], modelContent["linkDataArray"]);
 		myDiagram.model.linkFromPortIdProperty="fromPort";
 		myDiagram.model.linkToPortIdProperty="toPort";
 

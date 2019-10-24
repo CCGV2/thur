@@ -306,7 +306,7 @@ function save() {
 		timeout: 2000,
 		success:function(response){
 			console.log("success save");
-			console.log(response);
+			
 			myDiagram.isModified = false;
 
 		}
@@ -322,7 +322,9 @@ function save() {
 		timeout: 2000,
 		success: function(response){
 			logJSON = [];
-			//console.log(response);
+			logs = [];
+			console.log("seccuss upload");
+			console.log(response);
 		}
 	})
 }
