@@ -11,7 +11,14 @@
 		</h3>
 		<br>
 		<br>
-		<a href="/login">
-		<button class="big ui button">登陆</button></a>
+		<% if (user) {%>
+			<a href="/home/<%= user._id %>">
+				<button class="big ui button">进入主页</button>
+			</a>
+			
+		<%} else {%>
+			<a href="/login">
+			<button class="big ui button">登陆</button></a>
+		<% } %>
 	</div>
 </div>
