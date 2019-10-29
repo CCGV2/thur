@@ -282,6 +282,7 @@ myDiagram.model.addChangedListener(function(evt) {
 		logs.push(SpeLog);
 	}
 })
+zoomSlider = new ZoomSlider(myDiagram);
 
 setInterval(save, 10000);
 function save() {
