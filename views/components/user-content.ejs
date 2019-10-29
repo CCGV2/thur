@@ -35,7 +35,7 @@
 		新建模型
 	</div>
 	<div class="new-file-model-content">
-		<form class="ui form" method="post" action="/home/create">
+		<form id="new-file-form" class="ui form" method="post" action="/home/create">
 			<h4 class="ui dividing header">新建模型</h4>
 			<div class="field">
 				<label>文件名</label>
@@ -60,7 +60,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="ui primary submit button">提交</div>
+			<div class="ui primary submit button" id="submit-button">提交</div>
 			<div class="ui error message"></div>
 		</form>
 	</div>
@@ -88,6 +88,11 @@
 				}]
 			}
 		});
+	$(document).ready(function(){
+		$('#new-file-form').submit(function(){
+			$('#submit-button').toggleClass('disabled');
+		})
+	})
 </script>
 <script type="text/javascript">
 	//新建按钮动画

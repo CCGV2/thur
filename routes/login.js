@@ -34,6 +34,7 @@ router.post('/', checkNotLogin, function(req, res, next) {
 			return res.redirect('back');
 		}
 		console.log("登陆成功");
+		console.log(user);
 		req.flash('success', '登陆成功');
 		// 用户信息写入session
 		delete user.password;

@@ -27,7 +27,7 @@ myDiagram.addDiagramListener("Modified", function(e){
 	} else {
 		if (info.innerHTML=="更改未保存"){
 			info.innerHTML = "更改已保存";
-			info.style.color = "black";
+			info.style.color = "green";
 		}
 	}
 })
@@ -212,7 +212,7 @@ modelJSON = modelJSON.replace(/\n/g, '\\n');
 modelContent = JSON.parse(modelJSON);
 
 myDiagram.linkTemplate = GO(go.Link,
-	{reshapable: true, resegmentable: true},
+	{reshapable: false, resegmentable: true},
 	{adjusting: go.Link.Stretch},
 	new go.Binding("points", "points").makeTwoWay(),
 	new go.Binding("fromSpot", "fromSpot", go.Spot.parse).makeTwoWay(go.Spot.stringify),
@@ -283,7 +283,7 @@ myDiagram.model.addChangedListener(function(evt) {
 	}
 })
 
-setInterval(save, 3000);
+setInterval(save, 10000);
 function save() {
 	if (!myDiagram.isModified){
 		return ;
