@@ -70,29 +70,30 @@
 <script type="text/javascript">
 	$('.ui.form')
 		.form({
-			filename: {
-				identifier: 'filename',
-				rules: [{
-					type: 'empty',
-					prompt: '请输入文件名'
-				}, {
-					type: 'maxLength[20]',
-					prompt: '文件名过长'
-				}]
+			fields:{
+				filename: {
+					identifier: 'filename',
+					rules: [{
+						type: 'empty',
+						prompt: '请输入文件名'
+					}, {
+						type: 'maxLength[20]',
+						prompt: '文件名过长'
+					}]
+				},
+				filetype: {
+					identifier: 'filetype',
+					rules: [{
+						type: 'empty',
+						prompt: '请选择类型'
+					}]
+				}
 			},
-			filetype: {
-				identifier: 'filetype',
-				rules: [{
-					type: 'empty',
-					prompt: '请选择类型'
-				}]
+			onSuccess: function(){
+				alert("创建成功");
 			}
 		});
-	$(document).ready(function(){
-		$('#new-file-form').submit(function(){
-			$('#submit-button').toggleClass('disabled');
-		})
-	})
+	
 </script>
 <script type="text/javascript">
 	//新建按钮动画
