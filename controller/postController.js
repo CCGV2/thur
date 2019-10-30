@@ -71,8 +71,7 @@ exports.remove = (req, res) => {
 		console.log(req.session.user.models);
 		req.session.user.models.splice(index, 1);
 		console.log(req.session.user.models);
-		req.session.user.count--;
-		User.updateOne({"_id":req.session.user._id}, {$pull:{models:id}, $set:{count:req.session.user.count}}, function(err){
+		User.updateOne({"_id":req.session.user._id}, {$pull:{models:id}}, function(err){
 			if (err) {
 				console.log(err);
 			}

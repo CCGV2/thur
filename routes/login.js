@@ -3,6 +3,7 @@ var express = require('express');
 var router = express.Router();
 var fs = require('fs');
 var path = require('path');
+var moment = require('moment');
 
 var UserModel = require('../models/user');
 var DiagramModel = require('../models/diagram');
@@ -21,7 +22,7 @@ router.post('/', checkNotLogin, function(req, res, next) {
 	var password = req.body.password;
 	console.log("start login");
 	console.log(name + password);
-	UserModel.findOne().byName(name).populate({path: 'models', select:'content title'}).exec(function(err, user) {
+	UserModel.findOne().byName(name).populate({path: 'models', select:'content title updatedAt'}).exec(function(err, user) {
 		console.log("after find");
 		console.log(user);
 		if (!user) {
@@ -46,6 +47,8 @@ router.post('/', checkNotLogin, function(req, res, next) {
 					})
 				}
 			});
+			user.models[i].updatedAt = moment(user.models[i].updatedAt).format('LLLL');
+
 		}
 		req.session.user = user;
 		return res.redirect(`/home/${user._id}`);

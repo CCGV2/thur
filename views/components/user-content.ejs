@@ -12,14 +12,15 @@
 			<% for (var i = 0; i < user.models.length; i++) { %>
 				<div class="column">
 					<div class="ui fluid card">
-						<div class="ui small rounded image">
+						<div class="ui fluid rounded image">
 							<a href="/post/<%= user.models[i]._id %>">
-								<img style="background-color: WHITE" class="ui small rounded image" src="/img/<%= user.models[i]._id %>.png">
+								<img style="background-color: WHITE" class="ui fluid rounded image" src="/img/<%= user.models[i]._id %>.png">
 							</a>
 
 						</div>
 						<a href="/post/<%= user.models[i]._id %>/remove" class="ui circular floating red label" style="max-width: 20px" onclick="return confirm('确定要删除该模型吗？')"><i class="trash alternate icon" style="margin-left: 1px"></i></a>
 						<div class="content"><%= user.models[i].title %></div>
+						<div class="content"><%= user.models[i].updatedAt%></div>
 					</div>
 					
 					

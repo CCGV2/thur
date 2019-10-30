@@ -22,7 +22,7 @@ exports.index = (req, res) => {
 
 exports.user_detail = (req, res) => {
 	var user = req.session.user;
-	User.findOne({"_id": user._id}).populate({path: 'models', select:'content title'})
+	User.findOne({"_id": user._id}).populate({path: 'models', select:'content title updatedAt'})
 	.exec(function(err, target){
 		if (err) {
 			console.log(err);
@@ -30,6 +30,14 @@ exports.user_detail = (req, res) => {
 		console.log(target);
 		delete target.password;
 		target.models.forEach(makeImg);
+		for (var i = 0; i < target.models.length; i++) {
+			var date = new Date(target.models[i].updatedAt);
+			target.models[i].updatedAt = date.toISOString().
+										  replace(/T/, ' ').      // replace T with a space
+										  replace(/\..+/, '');
+			console.log(date);
+			
+		}
 		req.session.user = target;
 		res.render('user');
 	});
@@ -58,15 +66,14 @@ exports.user_new_diagram = (req, res) => {
 				dfd.makeImg(file, function(){
 					User.findByIdAndUpdate(
 					user._id,
-					{$push: {models: file._id}, $set: {count: user.count + 1}},
+					{$push: {models: file._id}},
 					{new: true}
-					).populate({path: 'models', select:'content title'}).exec(
+					).populate({path: 'models', select:'content title updatedAt'}).exec(
 					function(error, success) {
 						if (error) {
 							console.log(error);
 						} else {
 
-							user.count += 1;
 							user.models.push(file._id);
 							req.session.user = success;
 							req.session.models = success.models;
