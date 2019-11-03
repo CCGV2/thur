@@ -18,8 +18,6 @@ router.get('/', home_controller.index);
 router.post('/', checkNotLogin, function(req, res, next) {
 	var name = req.body.name;
 	var password = req.body.password;
-	console.log("start login");
-	console.log(name + password);
 	UserModel.findOne().byName(name).populate({path: 'models', select:'content title updatedAt'}).exec(function(err, user) {
 		console.log("after find");
 		console.log(user);

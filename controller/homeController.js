@@ -3,6 +3,7 @@ const Diagram = require('../models/diagram');
 const dfd = require('../tools/dfd');
 var path = require('path');
 var fs = require('fs');
+var moment = require('moment');
 var publicPath = path.resolve(__dirname, '../public');
 
 function makeImg(element, index, array){
@@ -31,15 +32,14 @@ exports.user_detail = (req, res) => {
 		console.log(target);
 		delete target.password;
 		target.models.forEach(makeImg);
+
+		req.session.user = target;
 		for (var i = 0; i < target.models.length; i++) {
 			var date = new Date(target.models[i].updatedAt);
-			target.models[i].updatedAt = date.toISOString().
-										  replace(/T/, ' ').      // replace T with a space
-										  replace(/\..+/, '');
-			console.log(date);
+			user.models[i].updatedAt = moment(target.models[i].updatedAt).format('LLLL').toString();
 			
 		}
-		req.session.user = target;
+		console.log(target);
 		res.render('user');
 	});
 }
