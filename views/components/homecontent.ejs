@@ -1,14 +1,11 @@
 <div class="home-content">
 	
 	<div class="intro">
-		<h1>欢迎使用本平台</h1>
+		<h1 style="font-size: 35px;">欢迎使用本平台</h1>
 		<p>
 			<span style="color: #666">北京工业大学实训建模平台</span>
 			暂支持数据流图、UML类图、用例图，其他类型也在开发中
 		</p>
-		<h3>
-			点击下方进行登陆，即刻开始建模
-		</h3>
 		<br>
 		<br>
 		<% if (user) {%>
@@ -17,8 +14,23 @@
 			</a>
 			
 		<%} else {%>
-			<a href="/login">
-			<button class="big ui button">登陆</button></a>
+				<div class="ui grid">
+				  <div class="four wide column"></div>
+				  <div class="eight wide column">
+				    <form class="ui form segment" method="post">
+				      <div class="field required">
+				        <label>用户名</label>
+				        <input placeholder="请输入你的学号" type="text" name="name">
+				      </div>
+				      <div class="field required">
+				        <label>密码</label>
+				        <input placeholder="请输入系统派发的8位密码" type="password" name="password">
+				      </div>
+				      <input type="submit" class="ui button fluid" value="登录">
+				    </form>
+				  </div>
+				</div>
+
 		<% } %>
 	</div>
 </div>

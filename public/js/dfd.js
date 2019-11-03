@@ -299,6 +299,16 @@ zoomSlider = new ZoomSlider(myDiagram, {
     orientation: 'horizontal'
 });
 
+myDiagram.model.copyNodeDataFunction = function(obj, model) {
+    console.log(obj);
+    var a = {};
+    a.category = obj.category;
+    a.文本 = obj.文本;
+    a.loc = obj.loc + (30,30);
+    console.log(a);
+    return a;
+}
+
 setInterval(save, 10000);
 function save() {
 	if (!myDiagram.isModified){

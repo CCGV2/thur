@@ -54,39 +54,6 @@ router.post('/', checkNotLogin, function(req, res, next) {
 		return res.redirect(`/home/${user._id}`);
 	});
 
-	// UserModel.getUserByName(name)
-	// 	.then((user) => {
-	// 		if (!user) {
-	// 			req.flash('error', '用户不存在');
-	// 			return res.redirect('back');
-	// 		}
-	// 		// 检查密码
-	// 		if (sha1(password) !== user.password) {
-	// 			req.flash('error', '用户名或密码错误');
-	// 			return res.redirect('back');
-	// 		}
-	// 		req.flash('success', '登陆成功');
-	// 		// 用户信息写入 session
-	// 		delete user.password;
-	// 		req.session.user = user;
-	// 		console.log("user:" + JSON.stringify(user));
-	// 		console.log("user.model:" + user.models);
-	// 		if (user.count === 0) {
-	// 			req.session.models = [];
-	// 			return res.redirect(`/home/${user._id}`);
-	// 		}
-	// 	})
-	// 	.then((user) => {
-	// 		return ModelModel.getModelByIdArray(user.models)
-	// 	})
-	// 	.then(function(models){
-	// 		console.log("in the then: " + models);
-	// 		req.session.models = models;
-
-	// 		// 跳转到主页
-	// 		return res.redirect(`/home/${models[0].author}`);
-	// 	})
-	// 	.catch(next);
 });
 
 module.exports = router;

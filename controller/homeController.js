@@ -22,6 +22,7 @@ exports.index = (req, res) => {
 
 exports.user_detail = (req, res) => {
 	var user = req.session.user;
+	console.log(user);
 	User.findOne({"_id": user._id}).populate({path: 'models', select:'content title updatedAt'})
 	.exec(function(err, target){
 		if (err) {
