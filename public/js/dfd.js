@@ -4,6 +4,7 @@ var GO = go.GraphObject.make;
 var myDiagram = GO(go.Diagram, "myDiagramDiv",{
 	initialContentAlignment: go.Spot.Center,
 	allowDrop: true,
+	commandHandler: new DrawCommandHandler(),
 	// must be true to accept drops from the Palette
 	"LinkDrawn": showLinkLabel,
 	// this DiagramEvent listener is defined below
@@ -299,16 +300,6 @@ zoomSlider = new ZoomSlider(myDiagram, {
     orientation: 'horizontal'
 });
 
-myDiagram.model.copyNodeDataFunction = function(obj, model) {
-    console.log(obj);
-    var a = {};
-    a.category = obj.category;
-    a.文本 = obj.文本;
-    a.loc = obj.loc + (30,30);
-    console.log(a);
-    return a;
-}
-
 setInterval(save, 10000);
 function save() {
 	if (!myDiagram.isModified){
@@ -331,7 +322,6 @@ function save() {
 		contentType: "application/x-www-form-urlencoded",
 		timeout: 2000,
 		success:function(response){
-			console.log("success save");
 			
 			myDiagram.isModified = false;
 
@@ -349,8 +339,6 @@ function save() {
 		success: function(response){
 			logJSON = [];
 			logs = [];
-			console.log("seccuss upload");
-			console.log(response);
 		}
 	})
 }
