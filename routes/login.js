@@ -48,6 +48,7 @@ router.post('/', checkNotLogin, function(req, res, next) {
 				}
 			});
 			user.models[i].updatedAt = moment(user.models[i].updatedAt).format('LLLL');
+			
 
 		}
 		req.session.user = user;

@@ -228,7 +228,7 @@ exports.makeImg = async function makeImg(diagram, callback){
 			GO(go.Panel, "Auto", 
 				{cursor: "move"},
 				GO(go.Shape, {
-					fill: GO(go.Brush, "Radial", {0: "rgb(240,240,240)", 0.3: "rgb(240, 240, 240)", 1: "rgb(240,240,240,0)"}),
+					fill: GO(go.Brush, "Radial", {0: "rgb(240,240,240)", 0.3: "rgb(240, 240, 240)", 1: "rgba(240,240,240,0)"}),
 					stroke: null			
 				}), 
 				GO(go.TextBlock, "数据流", 
