@@ -212,3 +212,9 @@ a {
     top: 15px;
     z-index: 999;
 }
+
+#print-button {
+    position: fixed;
+    right:400px;
+    top: 15px;
+}

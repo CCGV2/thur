@@ -14,6 +14,7 @@ var myDiagram = GO(go.Diagram, "myDiagramDiv",{
 
 myDiagram.toolManager.mouseDownTools.add(GO(LinkShiftingTool));
 myDiagram.toolManager.mouseMoveTools.insertAt(0, new LinkLabelDraggingTool());
+myDiagram.toolManager.textEditingTool.defaultTextEditor = window.TextEditor;
 
 myDiagram.addDiagramListener("Modified", function(e){
 	var button = document.getElementById("save-button");
@@ -94,7 +95,9 @@ var entityTemplate = GO(go.Node, "Auto", nodeStyle(),{
     {
     	fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
         fromLinkable: true, toLinkable: true,
-        locationSpot: go.Spot.Center
+        fromLinkableDuplicates: true,toLinkableDuplicates:true,
+        locationSpot: go.Spot.Center,
+        cursor: "crosshair"
     },
 	GO(go.Panel, "Auto", 
 		GO(go.Shape, "Rectangle",
@@ -106,7 +109,8 @@ var entityTemplate = GO(go.Node, "Auto", nodeStyle(),{
 			wrap: go.TextBlock.WrapFit,
 			editable: true,
 			fromLinkable:false,
-			toLinkable:false
+			toLinkable:false,
+            cursor: "default", alignment: go.Spot.Center
 		},
 		new go.Binding("text", "文本").makeTwoWay(),
 
@@ -120,18 +124,20 @@ var processTemplate = GO(go.Node, "Auto",{
 	{
     	fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
         fromLinkable: true, toLinkable: true,
-        locationSpot: go.Spot.Center
+        fromLinkableDuplicates: true,toLinkableDuplicates:true,
+        locationSpot: go.Spot.Center,
+        cursor: "crosshair"
     }, GO(go.Panel, "Auto", GO(go.Shape, "Circle", {
 		minSize: new go.Size(40, 40),
 		fill: "transparent",
 		strokeWidth: 2
 	}), GO(go.TextBlock, textStyle(), {
 		margin: 8,
-		
+		cursor: "default",
 		wrap: go.TextBlock.WrapFit,
 		editable: true,
 		fromLinkable:false,
-		toLinkable:false
+		toLinkable:false, alignment: go.Spot.Center
 	},new go.Binding("text", "文本").makeTwoWay())))
 	// three named ports, one on each side except the top, all output only:;
 // var structureTemplate = GO(go.Node, "Auto",{click:function(e, obj){
@@ -171,13 +177,14 @@ var processTemplate = GO(go.Node, "Auto",{
 	  var structureTemplate = GO(go.Node, "Auto",nodeStyle(),{
 	  	fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
         fromLinkable: true, toLinkable: true,
+        fromLinkableDuplicates: true,toLinkableDuplicates:true,
         locationSpot: go.Spot.Center
 	  },
         GO(go.Panel, "Vertical",
-          { margin: 0 },
+          { margin: 0, cursor: "crosshair"},
 
           
-            GO(go.Shape, "MinusLine", { height:3, strokeWidth: 3, stroke: 'black', stretch: go.GraphObject.Fill} ),
+            GO(go.Shape, "MinusLine", { height:3, strokeWidth: 3, stroke: 'black', stretch: go.GraphObject.Fill}),
             
 
           GO(go.Panel, "Auto",
@@ -187,7 +194,10 @@ var processTemplate = GO(go.Node, "Auto",{
               fromLinkable:false,
               wrap: go.TextBlock.WrapFit,
 				editable: true,
-			  toLinkable:false},
+			  	toLinkable:false,
+			  	cursor: "default", 
+                alignment: go.Spot.Center
+				},
               new go.Binding("text", "文本").makeTwoWay())
             ),
 
@@ -212,13 +222,13 @@ modelJSON = modelJSON.replace(/\n/g, '\\n');
 modelContent = JSON.parse(modelJSON);
 
 myDiagram.linkTemplate = GO(go.Link,
-	{reshapable: false, resegmentable: true},
+	{reshapable: true, resegmentable: true},
 	{adjusting: go.Link.Stretch},
 	new go.Binding("points", "points").makeTwoWay(),
 	new go.Binding("fromSpot", "fromSpot", go.Spot.parse).makeTwoWay(go.Spot.stringify),
     new go.Binding("toSpot", "toSpot", go.Spot.parse).makeTwoWay(go.Spot.stringify),
 	GO(go.Shape, {strokeWidth:1.5}),
-	GO(go.Shape, {toArrow: "OpenTriangle"}),
+	GO(go.Shape, {toArrow: "OpenTriangle", scale: 1.5}),
 	GO(go.Panel, "Auto", 
 		{cursor: "move"},
 		GO(go.Shape, {
@@ -272,6 +282,7 @@ myDiagram.model.addChangedListener(function(evt) {
 			"parentLog": startTimeStamp
 		};
 		logs.push(SpeLog);
+        console.log(SpeLog);
 	} else {
 		var SpeLog = {
 			"content": changes,
@@ -280,6 +291,7 @@ myDiagram.model.addChangedListener(function(evt) {
 			"parentLog": startTimeStamp
 		}
 		logs.push(SpeLog);
+        console.log(SpeLog);
 	}
 })
 zoomSlider = new ZoomSlider(myDiagram);
@@ -329,3 +341,22 @@ function save() {
 		}
 	})
 }
+function printDiagram() {
+  var svgWindow = window.open();
+  if (!svgWindow) return;  // failure to open a new Window
+  var printSize = new go.Size(700, 960);
+  var bnds = myDiagram.documentBounds;
+  var x = bnds.x;
+  var y = bnds.y;
+  while (y < bnds.bottom) {
+    while (x < bnds.right) {
+      var svg = myDiagram.makeSVG({ scale: 1.0, position: new go.Point(x, y), size: printSize });
+      svgWindow.document.body.appendChild(svg);
+      x += printSize.width;
+    }
+    x = bnds.x;
+    y += printSize.height;
+  }
+  setTimeout(function() { svgWindow.print(); }, 1);
+}
+ 
