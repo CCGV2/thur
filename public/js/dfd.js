@@ -294,7 +294,10 @@ myDiagram.model.addChangedListener(function(evt) {
         console.log(SpeLog);
 	}
 })
-zoomSlider = new ZoomSlider(myDiagram);
+zoomSlider = new ZoomSlider(myDiagram, {
+    alignment: go.Spot.BottomLeft, alignmentFocus: go.Spot.BottomLeft,
+    orientation: 'horizontal'
+});
 
 setInterval(save, 10000);
 function save() {
