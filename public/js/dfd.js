@@ -1,6 +1,8 @@
 
 var GO = go.GraphObject.make;
 
+var logs = [];
+
 var myDiagram = GO(go.Diagram, "myDiagramDiv",{
 	initialContentAlignment: go.Spot.Center,
 	allowDrop: true,
@@ -50,6 +52,19 @@ function textStyle() {
 		stroke: "black"
 	}
 }
+
+function clickLog(e, obj) {
+	var hehe = new Date().getTime();
+	var content = "" + obj.data.category + " " + obj.data.文本 + " clicked";
+	var SpeLog = {
+			"content" : content,
+			"level" : 'C',
+			"timeStamp": hehe,
+			"parentLog": hehe
+		};
+	logs.push(SpeLog);
+}
+
 function makePort(name, align, spot, output, input) {
 	var horizontal = align.equals(go.Spot.Top) || align.equals(go.Spot.Bottom);
 	// the port is basically just a transparent rectangle that stretches along the side of the node,
@@ -89,9 +104,7 @@ function makePort(name, align, spot, output, input) {
 
 
 var entityTemplate = GO(go.Node, "Auto", nodeStyle(),{
-	click:function(e, obj){
-		//inspector.inspectObject(obj.data);
-	}},
+	click:clickLog},
         // the main object is a Panel that surrounds a TextBlock with a rectangular Shape
     {
     	fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
@@ -118,9 +131,7 @@ var entityTemplate = GO(go.Node, "Auto", nodeStyle(),{
 	))
 );
 var processTemplate = GO(go.Node, "Auto",{
-		click:function(e, obj){
-			//inspector.inspectObject(obj.data);
-		}
+		click: clickLog
 	}, nodeStyle(),
 	{
     	fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
@@ -179,7 +190,8 @@ var processTemplate = GO(go.Node, "Auto",{
 	  	fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
         fromLinkable: true, toLinkable: true,
         fromLinkableDuplicates: true,toLinkableDuplicates:true,
-        locationSpot: go.Spot.Center
+        locationSpot: go.Spot.Center,
+        click:clickLog
 	  },
         GO(go.Panel, "Vertical",
           { margin: 0, cursor: "crosshair"},
@@ -254,7 +266,6 @@ palette.model.nodeDataArray = [
 ];
 var startTimeStamp = new Date().getTime();
 var parentLog;
-var logs = [];
 myDiagram.model.addChangedListener(function(evt) {
 	// ignore unimportant Transaction events
 	
@@ -283,7 +294,6 @@ myDiagram.model.addChangedListener(function(evt) {
 			"parentLog": startTimeStamp
 		};
 		logs.push(SpeLog);
-        console.log(SpeLog);
 	} else {
 		var SpeLog = {
 			"content": changes,
@@ -292,7 +302,6 @@ myDiagram.model.addChangedListener(function(evt) {
 			"parentLog": startTimeStamp
 		}
 		logs.push(SpeLog);
-        console.log(SpeLog);
 	}
 })
 zoomSlider = new ZoomSlider(myDiagram, {
@@ -301,6 +310,7 @@ zoomSlider = new ZoomSlider(myDiagram, {
 });
 
 setInterval(save, 10000);
+setInterval(upload, 10000);
 function save() {
 	if (!myDiagram.isModified){
 		return ;
@@ -327,8 +337,15 @@ function save() {
 
 		}
 	})
+}
+
+function upload(){
+	if (logs.length === 0){
+		return ;
+	}
 	var logJSON = JSON.stringify(logs);
 	
+    var base_url = window.location.pathname;
 	$.ajax({
 		url: base_url + "/upload",
 		data: {'data': logJSON},
@@ -342,6 +359,7 @@ function save() {
 		}
 	})
 }
+
 function printDiagram() {
   var svgWindow = window.open();
   if (!svgWindow) return;  // failure to open a new Window

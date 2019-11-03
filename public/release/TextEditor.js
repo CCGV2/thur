@@ -67,6 +67,8 @@
     if (tool.state === go.TextEditingTool.StateActive) {
       tool.state = go.TextEditingTool.StateEditing;
     }
+    tool.diagram.startTransaction();
+    tool.diagram.commitTransaction("start to edit text");
 
     if (tool.selectsTextOnActivate) {
       textarea.select();
