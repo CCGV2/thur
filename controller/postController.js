@@ -2,6 +2,8 @@ const User = require('../models/user');
 const Diagram = require('../models/diagram');
 const Log = require('../models/log');
 const dfd = require('../tools/dfd');
+
+let AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
 exports.index = (req, res) => {
 	var id = req.params.postID;
 	console.log("post index");
@@ -84,19 +86,36 @@ exports.remove = (req, res) => {
 	
 }
 
+
+
 exports.upload = (req, res) => {
 	console.log("upload");
 	var id = req.params.postID;
 	var content = req.body.data;
 	var logDiagram = id;
 	var logAuthor = req.session.user._id;
-	var doc = ({
-		author: logAuthor,
-		model: logDiagram,
-		content: content
-	})
-	console.log(content);
-	Log.create(doc, function(err, docs){
+	var contentArray = JSON.parse(content);
+	//console.log(contentArray);
+	var cnt = 0;
+	var err;
+	function upLoadToDb(file){
+		return new Promise((resolve, reject) => {
+			var doc = ({
+				author:logAuthor,
+				model:logDiagram,
+				content:JSON.stringify(file)
+			});
+			Log.create(doc, function(err, docs){
+				if (err) {
+					err = err;
+				}
+			})
+			resolve(file);
+		})
+		
+	}
+	let promiseArray = contentArray.map(upLoadToDb);
+	Promise.all(promiseArray).then(result => {
 		if (err) return res.json({err: err});
 		else return res.json({success: true});
 	})
