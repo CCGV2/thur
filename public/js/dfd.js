@@ -285,6 +285,7 @@ myDiagram.model.addChangedListener(function(evt) {
 	// }
 	// the codes up there is useless for this case but useful for other cases, so I want to keep them there
 	var changes = evt.toString();
+	console.log(changes);
 	if (changes[0] === '*') {
 		startTimeStamp = new Date().getTime();
 		var SpeLog = {

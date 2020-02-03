@@ -34,6 +34,7 @@ router.post('/', checkNotLogin, function(req, res, next) {
 		console.log(user);
 		req.flash('success', '登陆成功');
 		// 用户信息写入session
+		console.log(user.models);
 		delete user.password;
 		for (var i = 0; i < user.models.length; i++){
 			fs.exists(path.resolve(__dirname, '../public', './img/' + user.models[i]._id + '.png'), function(exist){
