@@ -14,5 +14,7 @@ router.post('/:postID/upload', post_controller.upload);
 
 router.get('/:postID/remove', checkLogin, post_controller.remove);
 
+router.post('/:postID/changeTitle', post_controller.changeTitle);
+
 
 module.exports = router;

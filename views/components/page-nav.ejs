@@ -1,10 +1,125 @@
 	<!-- <div class="for wide column right floated">
 		<div class="ui right floated primary button" onclick="save()">保存</div>
 	</div> -->
-<div class="ui sixteen column" style="background-color: WHITE">
+<div id="design-header">
+	<div id="title">
+		<a href="/home/<%= user._id %>%>">
+			<button style="margin-left: 5px;margin-top:15px;margin-bottom: 5px; border: none;background: none;">
+				<i class="large left arrow icon"></i>
+			</button>
+		</a>
+		<div style="display: inline-block;" id="title_container">
+			<span><%= diagramTitle %></span>
+			<input type="text" style="display: none;" maxlength="50">
+		</div>
+		<div>
+			
+			<button class="ui basic dropdown button" style="position: fixed;right:270px;top: 15px;"><span class="text">打印</span>
+				<i class="dropdown icon"></i>
+				<div class="menu">
+					<div class="item" onclick="printDiagram"><span class="text">PDF</span></div>
+				</div>
+			</button>
+			<div id="save-info">更改已保存</div>
+			<div class="ui primary button save-button" id="save-button" onclick="save()">保存</div>
+		</div>
+	</div>
+	<div id="tool" style="height: 36px; min-width: 100%; padding-left: 40px;border-color: rgb(255,255,255);">
+		<div class="ui icon buttons">
+			<button class="ui basic button" title="撤销(Ctrl+Z)" onclick="undoDiagram"><i class="hand point left outline icon"></i></button>
+			<button class="ui basic button" title="恢复(ctrl+y)" onclick="redoDiagram"><i class="hand point right outline icon"></i></button>
+		</div>
+		<div class="ui icon buttons">
+			<button class="ui basic button" title="剪切(Ctrl+X)" onclick="cutDiagram"><i class="cut icon"></i></button>
+			<button class="ui basic button" title="复制(Ctrl+C)" onclick="copyDiagram"><i class="copy icon"></i></button>
+			<button class="ui basic button" title="粘贴(Ctrl+V)" onclick="pasteDiagram"><i class="paste icon"></i></button>
+		</div>
+		<select class="ui search dropdown">
+			<option value="">Font</option>
+			<option value="st">宋体</option>
+		</select>
+		<div class="ui icon buttons">
+			<button class="ui basic button" title="左对齐" onclick="leftAlign"><i class="align left icon"></i></button>
+			<button class="ui basic button" title="居中" onclick="centerAlign"><i class="align center icon"></i></button>
+			<button class="ui basic button" title="右对齐" onclick="rightAlign"><i class="align right icon"></i></button>
+		</div>
+		<div class="ui icon buttons">
+			<button class="ui basic button" title="加粗(Ctrl+B)" onclick="boldText"><i class="bold icon"></i></button>
+			<button class="ui basic button" title="下划线(Ctrl+U)" onclick="underlineText"><i class="underline icon"></i></button>
+			<button class="ui basic button" title="斜体(Ctrl+I)" onclick="italicText"><i class="italic icon"></i></button>
+		</div>
+		<div class="ui icon buttons">
+			<button class="ui basic dropdown button" title="起点"><i class="minus icon"></i>
+				<i class="dropdown icon"></i>
+				<div class="menu">
+					<div class="item">
+						<i class="minus icon" title="无" onclick=""></i>
+					</div>
+					<div class="item">
+						<i class="left arrow icon" title="箭头"></i>
+					</div>
+				</div>
+			</button>
+			<button class="ui basic dropdown button" title="终点"><i class="chevron right icon"></i><i class="dropdown icon"></i>
+				<div class="menu">
+					<div class="item">
+						<i class="minus icon" title="无"></i>
+					</div>
+					<div class="item">
+						<i class="right arrow icon" title="箭头"></i>
+					</div>
+				</div>
+			</button>
+		</div>
+		<div class="icon"></div>
+	</div>
+	<script type="text/javascript">
+		$('#title_container').click(function(){
+			$(this).children('span').css("display", "none");
+			var titlename = $(this).children('span').text();
+
+			$(this).children('input').css("display", "inline-block")
+			$(this).children('input').val(titlename)
+		})
+		$('input').blur(function(){
+			$('#title_container span').css("display", "inline-block")
+			$('#title_container input').css("display", "none")
+			var titlename = $('#title_container input').val();
+			$('#title_container span').text(titlename);
+
+    		var base_url = window.location.pathname;
+			$.ajax({
+				url: base_url + '/changeTitle',
+				data: {'data': titlename},
+				type: "POST",
+				dataType: "JSON",
+				contentType: "application/x-www-form-urlencoded",
+				timeout: 2000,
+				success:function(response){
+					console.log("change successfully")
+				}
+			})
+
+		})
+	</script>
+</div>
+<!-- <div class="ui sixteen column" style="background-color: WHITE; height: 50px;">
 	
-		<div class="four wide column">
-			<img style="height: 50px; margin: 5px 0px" src="/img/logo.png">
+		<a href="/home/<%= user._id %>%>">
+			<button style="margin-top: 5px; border: none;background: none;">
+				<i class="large left arrow icon"></i>
+			</button>
+		</a>
+		<div style="display: inline-block;">
+			<span><%= diagramTitle %></span>
+		</div>
+		<div class="ui dropdown button" id="print-button">
+			<span class="text">导出</span>
+			<div class="menu">
+				<div class="item" onclick="printDiagram()" style="z-index: 999">导出为PNG</div>
+				<div class="item" onclick="printDiagram()" style="z-index: 999">导出为PDF</div>
+				<div class="item" onclick="printDiagram()" style="z-index: 999">导出为JPG</div>
+			</div>
 		</div>
 		<div class="ui primary button" id="print-button" onclick="printDiagram()">打印</div>
 		<div id="save-info">更改已保存</div>
@@ -15,3 +130,4 @@
 			</div>
 		</div></a>
 </div>
+ -->

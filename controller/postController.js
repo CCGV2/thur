@@ -18,9 +18,36 @@ exports.index = (req, res) => {
 		}
 		req.session.content = diagram.content;
 		req.session.page = diagram.type;
-		return res.render(diagram.type, {content:diagram.content});
+		return res.render(diagram.type, {content:diagram.content, diagramTitle:diagram.title});
 	})
 };
+
+exports.changeTitle = (req, res) => {
+	var newTitle = req.body.data;
+	var id = req.params.postID;
+	console.log("changeTitle")
+	Diagram.findOne({_id:id}).exec(function(err, diagram) {
+		console.log("233");
+		if (err) {
+			req.flash('error', 'failed');
+			return res.redirect('back');
+		}
+		if (req.session.user._id != diagram.author) {
+			req.flash('error', '模型与作者不匹配');
+			return res.send("error");
+		}
+
+		Diagram.findByIdAndUpdate(id, {
+			$set:{title:newTitle}
+		}).exec(function(err) {
+			if (err) {
+				console.log(err);
+			}
+			console.log('success changeTitle');
+			return res.json({success:true});
+		})
+	})
+}
 
 exports.save = (req, res) => {
 	console.log("start to save");
@@ -30,7 +57,6 @@ exports.save = (req, res) => {
 	Diagram.findOne({_id:id}).exec(function(err, diagram) {
 		console.log("233");
 		if (err) {
-			console.log(err);
 			req.flash('error', 'failed');
 			return res.redirect('back');
 		}

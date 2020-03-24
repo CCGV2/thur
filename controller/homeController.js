@@ -24,23 +24,22 @@ exports.index = (req, res) => {
 exports.user_detail = (req, res) => {
 	var user = req.session.user;
 	console.log(user);
-	User.findOne({"_id": user._id}).populate({path: 'models', select:'content title updatedAt'})
-	.exec(function(err, target){
-		if (err) {
-			console.log(err);
-		}
-		console.log(target);
-		delete target.password;
-		target.models.forEach(makeImg);
+	var target = User.findOne({"_id": user._id}).populate({path: 'models', select:'content title updatedAt'}).then(function(doc){
+		console.log(doc);
+		delete doc.password;
+		doc.models.forEach(makeImg);
+		moment.locale('zh-cn');
+		user = doc;
 
-		req.session.user = target;
-		for (var i = 0; i < target.models.length; i++) {
-			var date = new Date(target.models[i].updatedAt);
-			user.models[i].updatedAt = moment(target.models[i].updatedAt).format('LLLL').toString();
-			
+		for (var i = 0; i < doc.models.length; i++) {
+			var date = new Date(doc.models[i].updatedAt);
+			var str = moment(doc.models[i].updatedAt).format('LLLL').toString()
+			doc.models[i].updatedAt = moment(doc.models[i].updatedAt).format('LLLL').toString();
+			user.models[i].updatedAtStr = str;
 		}
-		console.log(target);
-		res.render('user');
+		return user;
+	}).then(function(doc){
+		return res.render('user', {user:user});
 	});
 }
 
