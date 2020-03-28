@@ -87,6 +87,9 @@
 				</div>
 			</div>
 		</div>
+		<div class="ui icon buttons">
+			<button class="ui basic button" id="Help" title="帮助" onclick="showHelp()"><i class="help icon"></i></button>
+		</div>
 		<!-- <div class="ui dropdown">
 			<span class="">连线种类</span>
 			<i class="dropdown icon"></i>
@@ -102,6 +105,24 @@
 				</div>
 			</div>
 		</div> -->
+	</div>
+	<div class="ui basic modal">
+	  <div class="ui icon header">
+	    <i class="help icon"></i>
+	    操作指南
+	  </div>
+	  <div class="content">
+	    <p>从左侧工具栏拖拽节点即可添加节点。</p>
+	    <p>鼠标悬浮时接口出现，即可添加连接。</p>
+	    <p>选中连接后可以添加拐点。</p>
+	    <p>在右上角进行导出。</p>
+	  </div>
+	  <div class="actions">
+	    <div class="ui green ok inverted button">
+	      <i class="checkmark icon"></i>
+	      我知道了
+	    </div>
+	  </div>
 	</div>
 	<script type="text/javascript">
 		$('#title_container').click(function(){
@@ -131,6 +152,9 @@
 			})
 
 		})
+		function showHelp(){
+			$('.ui.basic.modal').modal('show');
+		}
 	</script>
 </div>
 <!-- <div class="ui sixteen column" style="background-color: WHITE; height: 50px;">
