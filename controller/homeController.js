@@ -77,12 +77,14 @@ exports.user_new_diagram = (req, res) => {
 							user.models.push(file._id);
 							req.session.user = success;
 							req.session.models = success.models;
+							
 						}
-						return res.redirect('back');
 					})
 				});
 			}
 		});
+		return res.json(200,{msg:"success",url:`/post/${file._id}`});
+		
 		
 	})
 	//return res.redirect(`/home/${user._id}`);

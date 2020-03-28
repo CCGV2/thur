@@ -13,65 +13,95 @@
 			<input type="text" style="display: none;" maxlength="50">
 		</div>
 		<div>
-			
-			<button class="ui basic dropdown button" style="position: fixed;right:270px;top: 15px;"><span class="text">打印</span>
-				<i class="dropdown icon"></i>
-				<div class="menu">
-					<div class="item" onclick="printDiagram"><span class="text">PDF</span></div>
-				</div>
+			<div class="ui buttons" style="position: fixed;right:270px;top: 15px;">
+				<button class="ui basic button" onclick="printDiagram('pdf')"><span class="text">PDF</span></button>
+				<button class="ui basic button" onclick="printDiagram('png')"><span class="text">PNG</span></button>
+				<button class="ui basic button" onclick="printDiagram('jpg')"><span class="text">JPG</span></button>
+			</div>
 			</button>
 			<div id="save-info">更改已保存</div>
-			<div class="ui primary button save-button" id="save-button" onclick="save()">保存</div>
+			<p class="jelly" style="position: fixed; right: 70px; top: 5px;"data-title="保存" onclick="saveButton()"></p>
+			<!-- <div class="ui primary button save-button" id="save-button" onclick="saveButton()">保存</div> -->
 		</div>
 	</div>
 	<div id="tool" style="height: 36px; min-width: 100%; padding-left: 40px;border-color: rgb(255,255,255);">
 		<div class="ui icon buttons">
-			<button class="ui basic button" title="撤销(Ctrl+Z)" onclick="undoDiagram"><i class="hand point left outline icon"></i></button>
-			<button class="ui basic button" title="恢复(ctrl+y)" onclick="redoDiagram"><i class="hand point right outline icon"></i></button>
+			<button class="ui basic button" id="Undo" title="撤销(Ctrl+Z)" onclick="myDiagram.commandHandler.undo()"><i class="hand point left outline icon"></i></button>
+			<button class="ui basic button" id="Redo" title="恢复(ctrl+y)" onclick="myDiagram.commandHandler.redo()"><i class="hand point right outline icon"></i></button>
 		</div>
 		<div class="ui icon buttons">
-			<button class="ui basic button" title="剪切(Ctrl+X)" onclick="cutDiagram"><i class="cut icon"></i></button>
-			<button class="ui basic button" title="复制(Ctrl+C)" onclick="copyDiagram"><i class="copy icon"></i></button>
-			<button class="ui basic button" title="粘贴(Ctrl+V)" onclick="pasteDiagram"><i class="paste icon"></i></button>
+			<button class="ui basic button" id="Cut" title="剪切(Ctrl+X)" onclick="myDiagram.commandHandler.cutSelection()"><i class="cut icon"></i></button>
+			<button class="ui basic button" id="Copy" title="复制(Ctrl+C)" onclick="myDiagram.commandHandler.copySelection()"><i class="copy icon"></i></button>
+			<button class="ui basic button" id="Paste" title="粘贴(Ctrl+V)" onclick="myDiagram.commandHandler.pasteSelection()"><i class="paste icon"></i></button>
 		</div>
-		<select class="ui search dropdown">
+	<!-- 	<select class="ui search dropdown">
 			<option value="">Font</option>
 			<option value="st">宋体</option>
-		</select>
+		</select> -->
 		<div class="ui icon buttons">
-			<button class="ui basic button" title="左对齐" onclick="leftAlign"><i class="align left icon"></i></button>
-			<button class="ui basic button" title="居中" onclick="centerAlign"><i class="align center icon"></i></button>
-			<button class="ui basic button" title="右对齐" onclick="rightAlign"><i class="align right icon"></i></button>
+			<button class="ui basic button" title="左对齐" onclick="leftAlign()"><i class="align left icon"></i></button>
+			<button class="ui basic button" title="居中" onclick="centerAlign()"><i class="align center icon"></i></button>
+			<button class="ui basic button" title="右对齐" onclick="rightAlign()"><i class="align right icon"></i></button>
 		</div>
 		<div class="ui icon buttons">
-			<button class="ui basic button" title="加粗(Ctrl+B)" onclick="boldText"><i class="bold icon"></i></button>
-			<button class="ui basic button" title="下划线(Ctrl+U)" onclick="underlineText"><i class="underline icon"></i></button>
-			<button class="ui basic button" title="斜体(Ctrl+I)" onclick="italicText"><i class="italic icon"></i></button>
+			<button class="ui basic button" title="加粗(Ctrl+B)" onclick="boldText()"><i class="bold icon"></i></button>
+			<!-- <button class="ui basic button" title="下划线(Ctrl+U)" onclick="underlineText"><i class="underline icon"></i></button> -->
+			<button class="ui basic button" title="斜体(Ctrl+I)" onclick="italicText()"><i class="italic icon"></i></button>
 		</div>
 		<div class="ui icon buttons">
 			<button class="ui basic dropdown button" title="起点"><i class="minus icon"></i>
 				<i class="dropdown icon"></i>
 				<div class="menu">
-					<div class="item">
-						<i class="minus icon" title="无" onclick=""></i>
+					<div class="item" onclick="setStart('')">
+						<i class="minus icon" title="无"></i>
 					</div>
-					<div class="item">
+					<div class="item" onclick="setStart('Backward')">
 						<i class="left arrow icon" title="箭头"></i>
 					</div>
 				</div>
 			</button>
 			<button class="ui basic dropdown button" title="终点"><i class="chevron right icon"></i><i class="dropdown icon"></i>
 				<div class="menu">
-					<div class="item">
+					<div class="item" onclick="setEnd('')">
 						<i class="minus icon" title="无"></i>
 					</div>
-					<div class="item">
-						<i class="right arrow icon" title="箭头"></i>
+					<div class="item" onclick="setEnd('OpenTriangle')">
+						<i class="right arrow icon" title="箭头" ></i>
 					</div>
 				</div>
 			</button>
 		</div>
-		<div class="icon"></div>
+
+		<div class="ui dropdown">
+			<span class="">节点种类</span>
+			<i class="dropdown icon"></i>
+			<div class="menu">
+				<div class="item" onclick="setCategory('entity')">
+					<span class="text">外部实体</span>
+				</div>
+				<div class="item" onclick="setCategory('structure')">
+					<span class="text">数据存储</span>
+				</div>
+				<div class="item" onclick="setCategory('process')">
+					<span class="text">加工</span>
+				</div>
+			</div>
+		</div>
+		<!-- <div class="ui dropdown">
+			<span class="">连线种类</span>
+			<i class="dropdown icon"></i>
+			<div class="menu">
+				<div class="item" onclick="changeAdjust('')">
+					<span class="text">直线</span>
+				</div>
+				<div class="item" onclick="changeAdjust('ben')">
+					<span class="text">曲线</span>
+				</div>
+				<div class="item" onclick="changeAdjust('orth')">
+					<span class="text">直角拐歪线</span>
+				</div>
+			</div>
+		</div> -->
 	</div>
 	<script type="text/javascript">
 		$('#title_container').click(function(){

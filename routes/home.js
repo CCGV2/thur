@@ -22,13 +22,13 @@ router.post('/', checkNotLogin, function(req, res, next) {
 		console.log("after find");
 		console.log(user);
 		if (!user) {
-			req.flash('error', '用户不存在');
-			return res.redirect('back');
+			return res.json({success:true,'error': '用户不存在'});
+			// return res.render('home',{success: true, 'error': '用户不存在'});
 		}
 		//检查密码
 		if (sha1(password) != user.password) {
-			req.flash('error', '用户名或密码错误');
-			return res.redirect('back');
+			return res.json({success:true,'error': '用户名或密码错误'});
+			// return res.render('home', {success: true, 'error': '用户名或密码错误'});
 		}
 		console.log("登陆成功");
 		console.log(user);
@@ -48,7 +48,7 @@ router.post('/', checkNotLogin, function(req, res, next) {
 
 		}
 		req.session.user = user;
-		return res.redirect(`/home/${user._id}`);
+		return res.json({success: true, 'url':`/home/${user._id}`});
 	});
 
 });

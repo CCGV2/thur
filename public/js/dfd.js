@@ -15,9 +15,10 @@ var myDiagram = GO(go.Diagram, "myDiagramDiv",{
 	scrollMargin:500,
 	resizingTool: new ResizeMultipleTool(),
 	"undoManager.isEnabled": true, // enable undo & redo
+	"panningTool.isEnabled": false
 });
-
 myDiagram.toolManager.mouseDownTools.add(GO(LinkShiftingTool));
+myDiagram.toolManager.mouseDownTools.add(myDiagram.toolManager.replaceTool("ContextMenu", null));
 myDiagram.toolManager.mouseMoveTools.insertAt(0, new LinkLabelDraggingTool());
 myDiagram.toolManager.textEditingTool.defaultTextEditor = window.TextEditor;
 
@@ -37,6 +38,11 @@ myDiagram.addDiagramListener("Modified", function(e){
 		}
 	}
 })
+$(window).bind('beforeunload', function(){
+    if( myDiagram.isModified){
+        return true;
+    }
+});
 function showLinkLabel(e) {
 	var label = e.subject.findObject("LABEL");
 	if (label !== null) label.visible = (e.subject.fromNode.data.category === "Conditional");
@@ -66,44 +72,21 @@ function clickLog(e, obj) {
 		};
 	logs.push(SpeLog);
 }
-
-function makePort(name, align, spot, output, input) {
-	var horizontal = align.equals(go.Spot.Top) || align.equals(go.Spot.Bottom);
-	// the port is basically just a transparent rectangle that stretches along the side of the node,
-	// and becomes colored when the mouse passes over it
-	return GO(go.Shape, {
-		fill: "transparent",
-		// changed to a color in the mouseEnter event handler
-		strokeWidth: 0,
-		// no stroke
-		width: horizontal ? NaN: 8,
-		// if not stretching horizontally, just 8 wide
-		height: !horizontal ? NaN: 8,
-		// if not stretching vertically, just 8 tall
-		alignment: align,
-		// align the port on the main Shape
-		stretch: (horizontal ? go.GraphObject.Horizontal: go.GraphObject.Vertical),
-		portId: name,
-		// declare this object to be a "port"
-		fromSpot: spot,
-		// declare where links may connect at this port
-		fromLinkable: output,
-		// declare whether the user may draw links from here
-		toSpot: spot,
-		// declare where links may connect at this port
-		toLinkable: input,
-		// declare whether the user may draw links to here
-		cursor: "pointer",
-		// show a different cursor to indicate potential link point
-		mouseEnter: function(e, port) { // the PORT argument will be this Shape
-		    if (!e.diagram.isReadOnly) port.fill = "rgba(255,0,255,0.5)";
-		},
-		mouseLeave: function(e, port) {
-		    port.fill = "transparent";
-		}
+function makePort(name, spot, output, input) {
+    // the port is basically just a small transparent square
+	return GO(go.Shape, "Circle",
+	{
+		fill: null,  // not seen, by default; set to a translucent gray by showSmallPorts, defined below
+		stroke: null,
+		desiredSize: new go.Size(8, 8),
+		alignment: spot,  // align the port on the main Shape
+		alignmentFocus: spot,  // just inside the Shape
+		portId: name,  // declare this object to be a "port"
+		fromSpot: spot, toSpot: spot,  // declare where links may connect at this port
+		fromLinkable: output, toLinkable: input,  // declare whether the user may draw links to/from here
+		cursor: "pointer"  // show a different cursor to indicate potential link point
 	});
 }
-
 
 var entityTemplate = GO(go.Node, "Auto", nodeStyle(),{
 	click:clickLog, resizable: true, desiredSize:new go.Size(100, 50)},
@@ -111,10 +94,10 @@ var entityTemplate = GO(go.Node, "Auto", nodeStyle(),{
         // the main object is a Panel that surrounds a TextBlock with a rectangular Shape
     {
     	fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
-        fromLinkable: true, toLinkable: true,
+        // fromLinkable: true, toLinkable: true,
         fromLinkableDuplicates: true,toLinkableDuplicates:true,
         locationSpot: go.Spot.Center,
-        cursor: "crosshair"
+        // cursor: "crosshair"
     },
 	GO(go.Panel, "Auto", 
 		GO(go.Shape, "Rectangle",
@@ -128,22 +111,63 @@ var entityTemplate = GO(go.Node, "Auto", nodeStyle(),{
 			toLinkable:false,
             cursor: "default", 
             alignment: go.Spot.Center,
-            textAlign: "center",
-            text: "外部实体"
+            textAlign: "left",
+            text: "外部实体",
+            name: "LABEL"
 		},
 		new go.Binding("text", "text").makeTwoWay(),
+		new go.Binding("textAlign", "textAlign").makeTwoWay(),
+		new go.Binding("font", "font").makeTwoWay()
 
-	))
+	)),
+	makePort("T", go.Spot.Top, true, true),
+	makePort("L", go.Spot.Left, true, true),
+	makePort("R", go.Spot.Right, true, true),
+	makePort("B", go.Spot.Bottom, true, true),
+	{ // handle mouse enter/leave events to show/hide the ports
+		mouseEnter: function(e, node) { showSmallPorts(node, true); },
+		mouseLeave: function(e, node) { showSmallPorts(node, false); },
+		contextMenu:     // define a context menu for each node
+          GO("ContextMenu",  // that has one button
+            GO("ContextMenuButton",
+              GO(go.TextBlock, "复制"),
+              { click: function(){
+              	myDiagram.commandHandler.copySelection();
+              } }),
+            GO("ContextMenuButton",
+              GO(go.TextBlock, "更改节点为数据存储"),
+              { click: function(){
+              	setCategory('structure');
+              } }),
+            GO("ContextMenuButton",
+              GO(go.TextBlock, "更改节点为加工"),
+              { click: function(){
+              	setCategory('process');
+              } }),
+            GO("ContextMenuButton",
+              GO(go.TextBlock, "删除所选内容"),
+              { click: function(){
+              	myDiagram.commandHandler.deleteSelection();
+              } })
+            // more ContextMenuButtons would go here
+          )  // end Adornment
+	}
 );
+function showSmallPorts(node, show) {
+	node.ports.each(function(port) {
+		if (port.portId !== "") {  // don't change the default port, which is the big shape
+			port.fill = show ? "rgba(0,0,0,.3)" : null;
+		}
+	});
+}	
 var processTemplate = GO(go.Node, "Auto",{
 		click: clickLog,resizable: true, desiredSize:new go.Size(70, 70)
 	}, nodeStyle(),new go.Binding("desiredSize", "size", go.Size.parse).makeTwoWay(go.Size.stringify),
 	{
     	fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
-        fromLinkable: true, toLinkable: true,
+        // fromLinkable: true, toLinkable: true,
         fromLinkableDuplicates: true,toLinkableDuplicates:true,
-        locationSpot: go.Spot.Center,
-        cursor: "crosshair"
+        locationSpot: go.Spot.Center
     }, GO(go.Panel, "Auto", GO(go.Shape, "Circle", {
 		minSize: new go.Size(40, 40),
 		fill: "transparent",
@@ -156,53 +180,54 @@ var processTemplate = GO(go.Node, "Auto",{
 		fromLinkable:false,
 		toLinkable:false, alignment: go.Spot.Center,
         textAlign: "center",
-        text: "加工"
-	},new go.Binding("text", "text").makeTwoWay())))
-	// three named ports, one on each side except the top, all output only:;
-// var structureTemplate = GO(go.Node, "Auto",{click:function(e, obj){
-// 	//	inspector.inspectObject(obj.data);
-// 	}},nodeStyle(), {
-//     	fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
-//         fromLinkable: true, toLinkable: true,
-//         locationSpot: go.Spot.Center
-//     }, GO(go.Panel, "Vertical", {margin: 5}, 
-// 	GO(go.Panel, "Auto", 
-// 		GO(go.Shape, "LineH", {
-// 			minSize: new go.Size(40, 40),
-// 			fill: "black",
-// 			strokeWidth: 2
-// 		})),
-// 	GO(go.Panel, "Auto", 
-// 		GO(go.Shape, "Rectangle", {
-// 			minSize: new go.Size(40, 40),
-// 			file: "whitle",
-// 			strokeWidth: 0
-// 		}),
-// 		GO(go.TextBlock, textStyle(),{
-// 			margin: 8,
-// 			maxSize: new go.Size(160, NaN),
-// 			wrap: go.TextBlock.WrapFit,
-// 			editable: true,
-// 			fromLinkable:false,
-// 			toLinkable:false
-// 		}, new go.Binding("text", "文本").makeTwoWay())),
-// 	GO(go.Panel, "Auto", 
-// 		GO(go.Shape, "LineH", {
-// 			minSize: new go.Size(40, 40),
-// 			fill: "black",
-// 			strokeWidth: 2
-// 		})))
-// 	);
+        text: "加工",
+        name: "LABEL"
+	},new go.Binding("text", "text").makeTwoWay(),
+	new go.Binding("textAlign", "textAlign").makeTwoWay(),
+	new go.Binding("font", "font").makeTwoWay())),
+	makePort("T", go.Spot.Top, true, true),
+	makePort("L", go.Spot.Left, true, true),
+	makePort("R", go.Spot.Right, true, true),
+	makePort("B", go.Spot.Bottom, true, true),
+	{ // handle mouse enter/leave events to show/hide the ports
+		mouseEnter: function(e, node) { showSmallPorts(node, true); },
+		mouseLeave: function(e, node) { showSmallPorts(node, false); },
+		contextMenu:     // define a context menu for each node
+          GO("ContextMenu",  // that has one button
+            GO("ContextMenuButton",
+              GO(go.TextBlock, "复制"),
+              { click: function(){
+              	myDiagram.commandHandler.copySelection();
+              } }),
+            GO("ContextMenuButton",
+              GO(go.TextBlock, "更改节点为数据存储"),
+              { click: function(){
+              	setCategory('structure');
+              } }),
+            GO("ContextMenuButton",
+              GO(go.TextBlock, "更改节点为外部实体"),
+              { click: function(){
+              	setCategory('entity');
+              } }),
+            GO("ContextMenuButton",
+              GO(go.TextBlock, "删除所选内容"),
+              { click: function(){
+              	myDiagram.commandHandler.deleteSelection();
+              } })
+            // more ContextMenuButtons would go here
+          )  // end Adornment
+	});
+
 	  var structureTemplate = GO(go.Node, "Auto",nodeStyle(),{
 	  	fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
-        fromLinkable: true, toLinkable: true,
+        // fromLinkable: true, toLinkable: true,
         fromLinkableDuplicates: true,toLinkableDuplicates:true,
         locationSpot: go.Spot.Center,
         click:clickLog,
         resizable: true, desiredSize: new go.Size(70, 50)
 	  },new go.Binding("desiredSize", "size", go.Size.parse).makeTwoWay(go.Size.stringify),
         GO(go.Panel, "Vertical",
-          { margin: 0, cursor: "crosshair"},
+          { margin: 0},
 
           
             GO(go.Shape, "MinusLine", { height:3, strokeWidth: 3, stroke: 'black', stretch: go.GraphObject.Fill}),
@@ -213,26 +238,165 @@ var processTemplate = GO(go.Node, "Auto",{
             GO(go.TextBlock, textStyle(),
               { margin: 8 ,
               fromLinkable:false,
-              wrap: go.TextBlock.WrapFit,
 				editable: true,
 			  	toLinkable:false,
 			  	cursor: "default", 
+				wrap: go.TextBlock.WrapFit,
                 alignment: go.Spot.Center,
         		textAlign: "center",
-        		text: "数据存储"
-				},
-              new go.Binding("text", "text").makeTwoWay())
+        		text: "数据存储", name:"LABEL",
+        		width: 62},
+        		new go.Binding("width", "size", function(str){
+        			var tmp = go.Size.parse(str);
+        			return tmp.width - 8;
+        		}).makeTwoWay(go.Size.stringify),
+				
+              	new go.Binding("text", "text").makeTwoWay(),
+				new go.Binding("textAlign", "textAlign").makeTwoWay(),
+				new go.Binding("font", "font").makeTwoWay())
             ),
 
             GO(go.Shape, "MinusLine", { height: 3, strokeWidth: 3, stroke: 'black', stretch: go.GraphObject.Fill} )
           
-        ) // end outer panel
-      ); // end node
+        ), // end outer panel
+
+	makePort("T", go.Spot.Top, true, true),
+	makePort("L", go.Spot.Left, true, true),
+	makePort("R", go.Spot.Right, true, true),
+	makePort("B", go.Spot.Bottom, true, true),
+	{ // handle mouse enter/leave events to show/hide the ports
+		mouseEnter: function(e, node) { showSmallPorts(node, true); },
+		mouseLeave: function(e, node) { showSmallPorts(node, false); },
+		contextMenu:     // define a context menu for each node
+          GO("ContextMenu",  // that has one button
+            GO("ContextMenuButton",
+              GO(go.TextBlock, "复制"),
+              { click: function(){
+              	myDiagram.commandHandler.copySelection();
+              } }),
+            GO("ContextMenuButton",
+              GO(go.TextBlock, "更改节点为外部实体"),
+              { click: function(){
+              	setCategory('entity');
+              } }),
+            GO("ContextMenuButton",
+              GO(go.TextBlock, "更改节点为加工"),
+              { click: function(){
+              	setCategory('process');
+              } }),
+            GO("ContextMenuButton",
+              GO(go.TextBlock, "删除所选内容"),
+              { click: function(){
+              	myDiagram.commandHandler.deleteSelection();
+              } })
+            // more ContextMenuButtons would go here
+          )  // end Adornment
+	}
+    ); // end node
 	// three named ports, one on each side except the bottom, all input only:
+
+myDiagram.contextMenu =
+    GO("ContextMenu",
+      GO("ContextMenuButton",
+      	GO(go.TextBlock, "全选"), 
+      	{click: function(e, obj) {e.diagram.commandHandler.selectAll();}},
+      	new go.Binding("visible", "", function(o) {
+                  return o.diagram.commandHandler.canSelectAll();
+                }).ofObject()),
+      GO("ContextMenuButton",
+        GO(go.TextBlock, "撤销"),
+        { click: function(e, obj) { e.diagram.commandHandler.undo(); } },
+        new go.Binding("visible", "", function(o) {
+                                          return o.diagram.commandHandler.canUndo();
+                                        }).ofObject()),
+      GO("ContextMenuButton",
+        GO(go.TextBlock, "恢复"),
+        { click: function(e, obj) { e.diagram.commandHandler.redo(); } },
+        new go.Binding("visible", "", function(o) {
+                                          return o.diagram.commandHandler.canRedo();
+                                        }).ofObject()),
+      GO("ContextMenuButton",
+        GO(go.TextBlock, "添加外部实体"),
+        { click: function(e, obj) {
+          e.diagram.commit(function(d) {
+            var data = {category: "entity", text:"外部实体"};
+            d.model.addNodeData(data);
+            part = d.findPartForData(data);  // must be same data reference, not a new {}
+            // set location to saved mouseDownPoint in ContextMenuTool
+            part.location = d.toolManager.contextMenuTool.mouseDownPoint;
+          }, 'new node');
+        } }),
+      GO("ContextMenuButton",
+        GO(go.TextBlock, "添加数据存储"),
+        { click: function(e, obj) {
+          e.diagram.commit(function(d) {
+            var data = {category: "structure", text:"数据存储"};
+            d.model.addNodeData(data);
+            part = d.findPartForData(data);  // must be same data reference, not a new {}
+            // set location to saved mouseDownPoint in ContextMenuTool
+            part.location = d.toolManager.contextMenuTool.mouseDownPoint;
+          }, 'new node');
+        } }),
+      GO("ContextMenuButton",
+        GO(go.TextBlock, "添加加工"),
+        { click: function(e, obj) {
+          e.diagram.commit(function(d) {
+            var data = {category: "process", text:"加工"};
+            d.model.addNodeData(data);
+            part = d.findPartForData(data);  // must be same data reference, not a new {}
+            // set location to saved mouseDownPoint in ContextMenuTool
+            part.location = d.toolManager.contextMenuTool.mouseDownPoint;
+          }, 'new node');
+        } }),
+      GO("ContextMenuButton", 
+      	GO(go.TextBlock, "复制"),
+      	{click: function(e, obj){e.diagram.commandHandler.copySelection()}},
+      	new go.Binding("visible", "", function(o){
+      		return o.diagram.commandHandler.canCopySelection();
+      	}).ofObject()),
+      GO("ContextMenuButton", 
+      	GO(go.TextBlock, "粘贴"),
+      	{click: function(e, obj){e.diagram.commandHandler.pasteSelection()}},
+      	new go.Binding("visible", "", function(o){
+      		return o.diagram.commandHandler.canPasteSelection();
+      	}).ofObject())
+    );
 
 var palette = GO(go.Palette, 'myPaletteDiv', {
 	scrollsPageOnFocus: false,
 	layout: GO(go.GridLayout, {spacing: new go.Size(10, 30)})
+});
+
+
+// enable or disable a particular button
+function enable(name, ok) {
+	var button = document.getElementById(name);
+	if (button) button.disabled = !ok;
+}
+// enable or disable all command buttons
+function enableAll() {
+	var cmdhnd = myDiagram.commandHandler;
+	enable("SelectAll", cmdhnd.canSelectAll());
+	enable("Cut", cmdhnd.canCutSelection());
+	enable("Copy", cmdhnd.canCopySelection());
+	enable("Paste", cmdhnd.canPasteSelection());
+	enable("Delete", cmdhnd.canDeleteSelection());
+	enable("Group", cmdhnd.canGroupSelection());
+	enable("Ungroup", cmdhnd.canUngroupSelection());
+	enable("Undo", cmdhnd.canUndo());
+	enable("Redo", cmdhnd.canRedo());
+}
+// notice whenever the selection may have changed
+myDiagram.addDiagramListener("ChangedSelection", function(e) {
+	enableAll();
+});
+// notice when the Paste command may need to be reenabled
+myDiagram.addDiagramListener("ClipboardChanged", function(e) {
+	enableAll();
+});
+// notice whenever a transaction or undo/redo has occurred
+myDiagram.addModelChangedListener(function(e) {
+	if (e.isTransactionFinished) enableAll();
 });
 
 myDiagram.nodeTemplateMap.add('entity', entityTemplate);
@@ -248,27 +412,84 @@ myDiagram.linkTemplate = GO(go.Link,
 	{reshapable: true, resegmentable: true},
 	{adjusting: go.Link.Stretch},
 	new go.Binding("points", "points").makeTwoWay(),
-	new go.Binding("fromSpot", "fromSpot", go.Spot.parse).makeTwoWay(go.Spot.stringify),
-    new go.Binding("toSpot", "toSpot", go.Spot.parse).makeTwoWay(go.Spot.stringify),
+	new go.Binding("adjusting", "adjusting").makeTwoWay(),
 	GO(go.Shape, {strokeWidth:3}),
-	GO(go.Shape, {toArrow: "OpenTriangle", scale: 1.5}),
+	GO(go.Shape, {toArrow: "OpenTriangle", scale: 1.5}, new go.Binding("toArrow", "toArrow").makeTwoWay()),
 	GO(go.Panel, "Auto", 
 		{cursor: "move"},
 		GO(go.Shape, {
 			fill: GO(go.Brush, "Radial", {0: "rgb(240,240,240)", 0.3: "rgb(240, 240, 240)", 1: "rgba(240,240,240,0)"}),
-			stroke: null			
+			stroke: null
 		}), 
 		GO(go.TextBlock,
 		textStyle(), {
 			editable: true,
-			text: "数据流"
-		}, new go.Binding("text", "text").makeTwoWay()),
+			text: "数据流",
+			name: "LABEL"
+		}, new go.Binding("text", "text").makeTwoWay(),
+		new go.Binding("textAlign", "textAlign").makeTwoWay(),
+		new go.Binding("font", "font").makeTwoWay()),
 		new go.Binding("segmentOffset", "segmentOffset", go.Point.parse).makeTwoWay(go.Point.stringify)),
-	GO(go.Shape, {fromArrow: "BackwardOpenTriangle"})
+	GO(go.Shape, {fromArrow: ""}, new go.Binding("fromArrow", "fromArrow").makeTwoWay())
 );
+
+// var orth = GO(go.Link,
+// 	{reshapable: true, resegmentable: true, routing: go.Link.Orthogonal},
+// 	{adjusting: go.Link.Stretch},
+// 	new go.Binding("points", "points").makeTwoWay(),
+// 	new go.Binding("adjusting", "adjusting").makeTwoWay(),
+// 	GO(go.Shape, {strokeWidth:3}),
+// 	GO(go.Shape, {toArrow: "OpenTriangle", scale: 1.5}, new go.Binding("toArrow", "toArrow").makeTwoWay()),
+// 	GO(go.Panel, "Auto", 
+// 		{cursor: "move"},
+// 		GO(go.Shape, {
+// 			fill: GO(go.Brush, "Radial", {0: "rgb(240,240,240)", 0.3: "rgb(240, 240, 240)", 1: "rgba(240,240,240,0)"}),
+// 			stroke: null			
+// 		}), 
+// 		GO(go.TextBlock,
+// 		textStyle(), {
+// 			editable: true,
+// 			text: "数据流",
+// 			name: "LABEL"
+// 		}, new go.Binding("text", "text").makeTwoWay(),
+// 		new go.Binding("textAlign", "textAlign").makeTwoWay(),
+// 		new go.Binding("font", "font").makeTwoWay()),
+// 		new go.Binding("segmentOffset", "segmentOffset", go.Point.parse).makeTwoWay(go.Point.stringify)),
+// 	GO(go.Shape, {fromArrow: ""}, new go.Binding("fromArrow", "fromArrow").makeTwoWay())
+// );
+
+// var ben = 
+// 	GO(go.Link,
+// 	{curve: go.Link.Bezier,reshapable: true, resegmentable: true,
+//     toShortLength: 3},
+// 	new go.Binding("points").makeTwoWay(),
+// 	new go.Binding("curviness").makeTwoWay(),
+// 	GO(go.Shape, {strokeWidth:3}),
+// 	GO(go.Shape, {toArrow: "OpenTriangle", scale: 1.5}, new go.Binding("toArrow", "toArrow").makeTwoWay()),
+// 	GO(go.Panel, "Auto", 
+// 		{cursor: "move"},
+// 		GO(go.Shape, {
+// 			fill: GO(go.Brush, "Radial", {0: "rgb(240,240,240)", 0.3: "rgb(240, 240, 240)", 1: "rgba(240,240,240,0)"}),
+// 			stroke: null			
+// 		}), 
+// 		GO(go.TextBlock,
+// 		textStyle(), {
+// 			editable: true,
+// 			text: "数据流",
+// 			name: "LABEL"
+// 		}, new go.Binding("text", "text").makeTwoWay(),
+// 		new go.Binding("textAlign", "textAlign").makeTwoWay(),
+// 		new go.Binding("font", "font").makeTwoWay())
+// 		),
+// 	GO(go.Shape, {fromArrow: ""}, new go.Binding("fromArrow", "fromArrow").makeTwoWay())
+// );
+
+// myDiagram.linkTemplateMap.add('ben', ben);
+// myDiagram.linkTemplateMap.add('orth', orth);
+
 myDiagram.model = new go.GraphLinksModel(modelContent["nodeDataArray"], modelContent["linkDataArray"]);
-myDiagram.model.linkFromPortIdProperty="fromPort";
-myDiagram.model.linkToPortIdProperty="toPort";
+// myDiagram.model.linkFromPortIdProperty="fromPort";
+// myDiagram.model.linkToPortIdProperty="toPort";
 palette.nodeTemplateMap = myDiagram.nodeTemplateMap;
 
 palette.model.nodeDataArray = [
@@ -276,6 +497,129 @@ palette.model.nodeDataArray = [
 	{category: "structure", text: "数据存储"},
 	{category: "process", text: "加工"}
 ];
+function leftAlign(){
+	myDiagram.commit(function(d) {
+    d.selection.each(function(node) {
+      var shape = node.findObject("LABEL");
+      // If there was a GraphObject in the node named SHAPE, then set its fill to red:
+      if (shape !== null) {
+        shape.textAlign = "left";
+      }
+    });
+  }, "ChangeTextAlign");
+	
+}
+function rightAlign(){
+	myDiagram.commit(function(d) {
+    d.selection.each(function(node) {
+      var shape = node.findObject("LABEL");
+      // If there was a GraphObject in the node named SHAPE, then set its fill to red:
+      if (shape !== null) {
+        shape.textAlign = "right";
+      }
+    });
+  }, "ChangeTextAlign");
+}
+function centerAlign(){
+	myDiagram.commit(function(d) {
+    d.selection.each(function(node) {
+      var shape = node.findObject("LABEL");
+      // If there was a GraphObject in the node named SHAPE, then set its fill to red:
+      if (shape !== null) {
+        shape.textAlign = "center";
+      }
+    });
+  }, "ChangeTextAlign");
+}
+
+function boldText(){
+	myDiagram.commit(function(d) {
+		d.selection.each(function(node) {
+			var shape = node.findObject("LABEL");
+			if (shape !== null) {
+				
+				var fontStr = shape.font;
+
+				if (fontStr.search('bold') !== -1) {
+					console.log('nmsl')
+					fontStr = fontStr.replace('bold ', '');
+				} else {
+					if (fontStr.search('italic') !== -1) {
+						fontStr = fontStr.replace('italic', 'italic bold');
+					} else {
+						if (fontStr[0] == ' ')
+							fontStr = 'bold' + fontStr;
+						else
+							fontStr = 'bold ' + fontStr;
+					}
+				}
+				shape.font = fontStr;
+				console.log(shape.font);
+			}
+		})
+	}, "ChangeTextBold");
+}
+function italicText(){
+	myDiagram.commit(function(d) {
+		d.selection.each(function(node) {
+			var shape = node.findObject("LABEL");
+			if (shape !== null) {
+				
+				var fontStr = shape.font;
+
+				if (fontStr.search('italic') !== -1) {
+					console.log('nmsl')
+					fontStr = fontStr.replace('italic ', '');
+				} else {
+					fontStr = 'italic ' + fontStr;
+				}
+				shape.font = fontStr;
+				console.log(shape.font);
+			}
+		})
+	}, "ChangeTextItalic");
+}
+
+function setStart(str){
+	myDiagram.commit(function(d) {
+
+		d.selection.each(function(node) {
+			d.model.set(node.data, "fromArrow", str);
+		})
+	}, "ChangeFromArrow");
+}
+
+function setEnd(str) {
+	myDiagram.commit(function(d) {
+
+		d.selection.each(function(node) {
+			d.model.set(node.data, "toArrow", str);
+		})
+	}, "ChangeToArrow");
+}
+
+function setCategory(str) {
+	myDiagram.commit(function(d) {
+		d.selection.each(function(node) {
+			if (node instanceof go.Node){
+				d.model.set(node.data, "category", str);
+			}
+		})
+	}, "ChangeCategory");
+}
+
+function changeAdjust(str) {
+	myDiagram.commit(function(d) {
+		d.selection.each(function(node) {
+			if (node instanceof go.Link) {
+				console.log(node.data.category);
+				d.model.set(node.data, "category", str);
+			}
+		})
+	}, "ChangeCategoryLine")
+}
+
+
 var startTimeStamp = new Date().getTime();
 var parentLog;
 myDiagram.model.addChangedListener(function(evt) {
@@ -324,6 +668,33 @@ zoomSlider = new ZoomSlider(myDiagram, {
 
 setInterval(save, 10000);
 setInterval(upload, 10000);
+function saveButton() {
+	if (!myDiagram.isModified){
+		return ;
+	}
+	var dataJSON = myDiagram.model.toJson();
+	dataJSON = dataJSON.replace(/\r\n/g, '');
+	dataJSON = dataJSON.replace(/\n/g, '');
+	dataJSON = dataJSON.replace(/\r/g, '');
+    // dataJSON = dataJSON.replace(/[\'\\\/\b\f\n\r\t]/g, '');
+    // dataJSON = dataJSON.replace(/[\"]/g, '\"');
+    var t = typeof dataJSON;
+    var base_url = window.location.pathname;
+    
+	$.ajax({
+		url: base_url + "/save",
+		data: {'data': dataJSON},
+		type: "POST",
+		dataType: "JSON",
+		contentType: "application/x-www-form-urlencoded",
+		timeout: 2000,
+		success:function(response){
+			
+			myDiagram.isModified = false;
+			window.onbeforeunload = null;
+		}
+	}).fail  (function(jqXHR, textStatus, errorThrown) { alert("服务器连接超时。请检查网络，若网络无问题请联系管理员。")   ; })
+}
 function save() {
 	if (!myDiagram.isModified){
 		return ;
@@ -347,7 +718,7 @@ function save() {
 		success:function(response){
 			
 			myDiagram.isModified = false;
-
+			window.onbeforeunload = null;
 		}
 	})
 }
@@ -373,22 +744,35 @@ function upload(){
 	})
 }
 
-function printDiagram() {
-  var svgWindow = window.open();
-  if (!svgWindow) return;  // failure to open a new Window
-  var printSize = new go.Size(700, 960);
-  var bnds = myDiagram.documentBounds;
-  var x = bnds.x;
-  var y = bnds.y;
-  while (y < bnds.bottom) {
-    while (x < bnds.right) {
-      var svg = myDiagram.makeSVG({ scale: 1.0, position: new go.Point(x, y), size: printSize });
-      svgWindow.document.body.appendChild(svg);
-      x += printSize.width;
-    }
-    x = bnds.x;
-    y += printSize.height;
-  }
-  setTimeout(function() { svgWindow.print(); }, 1);
+function printDiagram(str) {
+	if (str == 'pdf') {
+		var svgWindow = window.open();
+		if (!svgWindow) return;  // failure to open a new Window
+		var printSize = new go.Size(700, 960);
+		var bnds = myDiagram.documentBounds;
+		var x = bnds.x;
+		var y = bnds.y;
+		while (y < bnds.bottom) {
+			while (x < bnds.right) {
+				var svg = myDiagram.makeSVG({ scale: 1.0, position: new go.Point(x, y), size: printSize });
+				svgWindow.document.body.appendChild(svg);
+				x += printSize.width;
+			}
+			x = bnds.x;
+			y += printSize.height;
+		}
+		setTimeout(function() { svgWindow.print(); }, 1);
+	} else if (str == 'png') {
+		var svgWindow = window.open();
+		if (!svgWindow) return;  // failure to open a new Window
+		var svg = myDiagram.makeImage({scale : 1.0})
+		svgWindow.document.body.appendChild(svg);
+	} else if (str == 'jpg') {
+		var svgWindow = window.open();
+		console.log('nmsl');
+		if (!svgWindow) return;  // failure to open a new Window
+		var svg = myDiagram.makeImage({scale : 1.0, background:"white", type: "image/jpeg"})
+		svgWindow.document.body.appendChild(svg);
+	}
 }
  

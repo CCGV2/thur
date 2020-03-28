@@ -60,8 +60,8 @@ exports.save = (req, res) => {
 			req.flash('error', 'failed');
 			return res.redirect('back');
 		}
-		console.log(diagram.author)
-		console.log(req.session.user._id)
+		// console.log(diagram.author)
+		// console.log(req.session.user._id)
 		if (req.session.user._id != diagram.author) {
 			req.flash('error', '模型与作者不匹配');
 			return res.send("error");
@@ -75,7 +75,7 @@ exports.save = (req, res) => {
 				console.log(err);
 			}
 			dfd.makeImg(diagram, function(){});
-			console.log('success save');
+			// console.log('success save');
 			req.flash('success', '保存成功');
 			req.session.content = diagram.content;
 			return res.json({success:true});

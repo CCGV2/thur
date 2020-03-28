@@ -27,11 +27,14 @@ router.post('/', checkNotLogin, function(req, res, next) {
 		console.log(user);
 		if (!user) {
 			req.flash('error', '用户不存在');
+			req.session.error = "用户不存在";
 			return res.redirect('back');
 		}
 		//检查密码
 		if (sha1(password) != user.password) {
 			req.flash('error', '用户名或密码错误');
+
+			req.session.error = "用户名或密码错误";
 			return res.redirect('back');
 		}
 		console.log("登陆成功");

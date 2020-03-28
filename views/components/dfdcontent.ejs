@@ -5,6 +5,9 @@
 <script src="/release/TextEditor.js"></script>
 <script src="/release/ResizeMultipleTool.js"></script>
 <script src="/release/DrawCommandHandler.js"></script>
+<script src="/release/RealtimeDragSelectingTool.js"></script>
+<!-- <script src="/release/CurvedLinkReshapingTool.js"></script> -->
+
 <!-- <script src="/release/TextEditorRealtime.js"></script> -->
 <link rel="stylesheet" href="/release/ZoomSlider.css">
 <script type="text/javascript">
@@ -21,5 +24,43 @@
 
 <script src="/js/dfd.js"></script>
 <script type="text/javascript">
-	
+	const docStyle = document.documentElement.style
+    const aElem = document.querySelector('.jelly')
+    const boundingClientRect = aElem.getBoundingClientRect()
+
+    aElem.onmousemove = function(e) {
+
+		const x = e.clientX - boundingClientRect.left
+		const y = e.clientY - boundingClientRect.top
+
+		const xc = boundingClientRect.width/2
+		const yc = boundingClientRect.height/2
+
+		const dx = x - xc
+		const dy = y - yc
+
+		docStyle.setProperty('--rx', `${ dy/-1 }deg`)
+		docStyle.setProperty('--ry', `${ dx/10 }deg`)
+
+    }
+
+    aElem.onmouseleave = function(e) {
+      
+		docStyle.setProperty('--ty', '0')
+		docStyle.setProperty('--rx', '0')
+		docStyle.setProperty('--ry', '0')
+      
+    }
+
+    aElem.onmousedown = function(e) {
+      
+		docStyle.setProperty('--tz', '-25px')
+      
+    }
+
+    document.body.onmouseup = function(e) {
+      
+		docStyle.setProperty('--tz', '-12px')
+      
+    }
 </script>
