@@ -10,7 +10,8 @@
 		<br>
 		<% if (user) {%>
 			<a href="/home/<%= user._id %>">
-				<button class="big ui button">进入主页</button>
+				<p class="jelly" style="position: relative; text-align: center;" data-title="进入主页"></p>
+				<!-- <button class="big ui button">进入主页</button> -->
 			</a>
 			
 		<%} else {%>
@@ -26,9 +27,10 @@
 				        <label>密码</label>
 				        <input placeholder="请输入系统派发的8位密码" type="password" name="password">
 				      </div>
+				      <button type="submit" style="background-color: transparent; border: 0px;"><p class="jelly" style="position: relative; text-align: center;" data-title="登陆"></p></button>
+				      <!-- <p class="jelly" style="position: relative; text-align: center;" type="submit" data-title="登录"></p> -->
 
-					     
-				      <input type="submit" class="ui button fluid" value="登录">
+				      <!-- <p></p> type="submit" class="jelly" value="登录"> -->
 				    </form>
 				  </div>
 				</div>
@@ -52,9 +54,6 @@
 					contentType: "application/x-www-form-urlencoded",
 					timeout: 2000,
 					success:function(response){
-						console.log("msl");
-						console.log(response.url);
-						console.log(name);
 						if (response.url){
 							window.location.href=response.url;
 

@@ -640,6 +640,18 @@ myDiagram.model.addChangedListener(function(evt) {
 	// 	// })
 	// }
 	// the codes up there is useless for this case but useful for other cases, so I want to keep them there
+	if (evt.object){
+    console.log(evt.propertyName);
+    console.log("part:");
+    console.log(evt.object.part);
+    console.log(evt.modelChange);
+    if (evt.object.part instanceof go.Node)
+      // console.log(evt.obj.changes)
+		  // console.log(evt.oldValue.toString());
+      console.log(evt.object);
+	}
+  console.log(typeof(evt));
+  // console.log(evt.object.);
 	var changes = evt.toString();
 	console.log(changes);
 	if (changes[0] === '*') {
