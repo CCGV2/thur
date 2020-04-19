@@ -63,7 +63,7 @@ function textStyle() {
 
 function clickLog(e, obj) {
 	var hehe = new Date().getTime();
-	var content = "" + obj.data.category + " " + obj.data.文本 + " clicked";
+	var content = "" + obj.data.category + " " + obj.data.text + " clicked";
 	var SpeLog = {
 			"content" : content,
 			"level" : 'C',
@@ -640,19 +640,24 @@ myDiagram.model.addChangedListener(function(evt) {
 	// 	// })
 	// }
 	// the codes up there is useless for this case but useful for other cases, so I want to keep them there
+
+  var changes = evt.toString();
 	if (evt.object){
-    console.log(evt.propertyName);
-    console.log("part:");
-    console.log(evt.object.part);
-    console.log(evt.modelChange);
-    if (evt.object.part instanceof go.Node)
-      // console.log(evt.obj.changes)
-		  // console.log(evt.oldValue.toString());
-      console.log(evt.object);
+    // console.log(evt.propertyName);
+    // console.log("part:");
+    console.log(evt.object);
+    // console.log(evt.modelChange);
+    if (evt.object.category){
+      changes += " category: " + evt.object.category + " key: " + evt.object.key + " text: " + evt.object.text;
+    } else if (evt.object.from) {
+      // console.log("nmsl");
+      changes += " from: " + evt.object.from + " to: " + evt.object.to + " points: " + " text: " + (evt.object.text ? evt.object.text:"数据流");
+      // changes += " from: " + evt.object.from.toString() + " to: " evt.object.to.toString();
+    }
 	}
-  console.log(typeof(evt));
+
+  // console.log(typeof(evt));
   // console.log(evt.object.);
-	var changes = evt.toString();
 	console.log(changes);
 	if (changes[0] === '*') {
 		startTimeStamp = new Date().getTime();
