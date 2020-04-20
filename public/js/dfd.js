@@ -421,11 +421,9 @@ myDiagram.linkTemplate = GO(go.Link,
 			fill: GO(go.Brush, "Radial", {0: "rgb(240,240,240)", 0.3: "rgb(240, 240, 240)", 1: "rgba(240,240,240,0)"}),
 			stroke: null
 		}), 
-		GO(go.TextBlock,
+		GO(go.TextBlock,"数据流",
 		textStyle(), {
-			editable: true,
-			text: "数据流",
-			name: "LABEL"
+			editable: true
 		}, new go.Binding("text", "text").makeTwoWay(),
 		new go.Binding("textAlign", "textAlign").makeTwoWay(),
 		new go.Binding("font", "font").makeTwoWay()),
@@ -433,6 +431,7 @@ myDiagram.linkTemplate = GO(go.Link,
 	GO(go.Shape, {fromArrow: ""}, new go.Binding("fromArrow", "fromArrow").makeTwoWay())
 );
 
+myDiagram.toolManager.linkingTool.archetypeLinkData={"text":"数据流"};
 // var orth = GO(go.Link,
 // 	{reshapable: true, resegmentable: true, routing: go.Link.Orthogonal},
 // 	{adjusting: go.Link.Stretch},
@@ -500,7 +499,11 @@ palette.model.nodeDataArray = [
 function leftAlign(){
 	myDiagram.commit(function(d) {
     d.selection.each(function(node) {
-      var shape = node.findObject("LABEL");
+      var shape;
+      if (node instanceof go.Link)
+        shape = node.elt(2).elt(1);
+      else 
+        shape = node.findObject("LABEL");//1004
       // If there was a GraphObject in the node named SHAPE, then set its fill to red:
       if (shape !== null) {
         shape.textAlign = "left";
@@ -512,7 +515,11 @@ function leftAlign(){
 function rightAlign(){
 	myDiagram.commit(function(d) {
     d.selection.each(function(node) {
-      var shape = node.findObject("LABEL");
+      var shape;
+      if (node instanceof go.Link)
+        shape = node.elt(2).elt(1);
+      else 
+        shape = node.findObject("LABEL");//1004
       // If there was a GraphObject in the node named SHAPE, then set its fill to red:
       if (shape !== null) {
         shape.textAlign = "right";
@@ -523,7 +530,11 @@ function rightAlign(){
 function centerAlign(){
 	myDiagram.commit(function(d) {
     d.selection.each(function(node) {
-      var shape = node.findObject("LABEL");
+      var shape;
+      if (node instanceof go.Link)
+        shape = node.elt(2).elt(1);
+      else 
+        shape = node.findObject("LABEL");//1004
       // If there was a GraphObject in the node named SHAPE, then set its fill to red:
       if (shape !== null) {
         shape.textAlign = "center";
@@ -535,13 +546,17 @@ function centerAlign(){
 function boldText(){
 	myDiagram.commit(function(d) {
 		d.selection.each(function(node) {
-			var shape = node.findObject("LABEL");
+      var shape;
+      if (node instanceof go.Link)
+        shape = node.elt(2).elt(1);
+      else 
+        shape = node.findObject("LABEL");//1004
 			if (shape !== null) {
 				
 				var fontStr = shape.font;
 
 				if (fontStr.search('bold') !== -1) {
-					console.log('nmsl')
+					// console.log('nmsl')
 					fontStr = fontStr.replace('bold ', '');
 				} else {
 					if (fontStr.search('italic') !== -1) {
@@ -562,13 +577,17 @@ function boldText(){
 function italicText(){
 	myDiagram.commit(function(d) {
 		d.selection.each(function(node) {
-			var shape = node.findObject("LABEL");
+			var shape;
+      if (node instanceof go.Link)
+        shape = node.elt(2).elt(1);
+      else 
+        shape = node.findObject("LABEL");//1004
 			if (shape !== null) {
 				
 				var fontStr = shape.font;
 
 				if (fontStr.search('italic') !== -1) {
-					console.log('nmsl')
+					// console.log('nmsl')
 					fontStr = fontStr.replace('italic ', '');
 				} else {
 					fontStr = 'italic ' + fontStr;
