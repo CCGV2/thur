@@ -780,6 +780,13 @@ function upload(){
 	})
 }
 
+function download(dataurl, filename) {
+  var a = document.createElement("a");
+  a.href = dataurl;
+  a.setAttribute("download", filename);
+  a.click();
+}
+
 function printDiagram(str) {
 	if (str == 'pdf') {
 		var svgWindow = window.open();
@@ -802,13 +809,17 @@ function printDiagram(str) {
 		var svgWindow = window.open();
 		if (!svgWindow) return;  // failure to open a new Window
 		var svg = myDiagram.makeImage({scale : 1.0})
+    // svg.name = "model.png";
+
 		svgWindow.document.body.appendChild(svg);
+    download(svg.src, "model.png");
+    // var url = svg;
 	} else if (str == 'jpg') {
 		var svgWindow = window.open();
-		console.log('nmsl');
 		if (!svgWindow) return;  // failure to open a new Window
 		var svg = myDiagram.makeImage({scale : 1.0, background:"white", type: "image/jpeg"})
 		svgWindow.document.body.appendChild(svg);
+    download(svg.src, "model.jpg");
 	}
 }
  
