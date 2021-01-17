@@ -2,7 +2,7 @@
 var GO = go.GraphObject.make;
 
 var logs = [];
-
+// initialize the diagram
 var myDiagram = GO(go.Diagram, "myDiagramDiv",{
 	initialContentAlignment: go.Spot.Center,
 	allowDrop: true,
@@ -12,8 +12,8 @@ var myDiagram = GO(go.Diagram, "myDiagramDiv",{
 	// this DiagramEvent listener is defined below
 	"LinkRelinked": showLinkLabel,
 	scrollsPageOnFocus: false,
-	scrollMargin:500,
-	resizingTool: new ResizeMultipleTool(),
+	scrollMargin:500, // margin outside content
+	resizingTool: new ResizeMultipleTool(), 
 	"undoManager.isEnabled": true, // enable undo & redo
 	"panningTool.isEnabled": false
 });
@@ -22,6 +22,7 @@ myDiagram.toolManager.mouseDownTools.add(myDiagram.toolManager.replaceTool("Cont
 myDiagram.toolManager.mouseMoveTools.insertAt(0, new LinkLabelDraggingTool());
 myDiagram.toolManager.textEditingTool.defaultTextEditor = window.TextEditor;
 
+// use listener to listen whether diagram is changed.
 myDiagram.addDiagramListener("Modified", function(e){
 	var button = document.getElementById("save-button");
 	var info = document.getElementById("save-info");
@@ -43,6 +44,7 @@ $(window).bind('beforeunload', function(){
         return true;
     }
 });
+
 function showLinkLabel(e) {
 	var label = e.subject.findObject("LABEL");
 	if (label !== null) label.visible = (e.subject.fromNode.data.category === "Conditional");
@@ -60,7 +62,7 @@ function textStyle() {
 		stroke: "black"
 	}
 }
-
+// Not useful anymore.
 function clickLog(e, obj) {
 	var hehe = new Date().getTime();
 	var content = "" + obj.data.category + " " + obj.data.text + " clicked";
@@ -72,6 +74,7 @@ function clickLog(e, obj) {
 		};
 	logs.push(SpeLog);
 }
+// make port for nodes
 function makePort(name, spot, output, input) {
     // the port is basically just a small transparent square
 	return GO(go.Shape, "Circle",
@@ -362,6 +365,7 @@ myDiagram.contextMenu =
       	}).ofObject())
     );
 
+// the menue on left.
 var palette = GO(go.Palette, 'myPaletteDiv', {
 	scrollsPageOnFocus: false,
 	layout: GO(go.GridLayout, {spacing: new go.Size(10, 30)})
@@ -432,63 +436,9 @@ myDiagram.linkTemplate = GO(go.Link,
 );
 
 myDiagram.toolManager.linkingTool.archetypeLinkData={"text":"数据流"};
-// var orth = GO(go.Link,
-// 	{reshapable: true, resegmentable: true, routing: go.Link.Orthogonal},
-// 	{adjusting: go.Link.Stretch},
-// 	new go.Binding("points", "points").makeTwoWay(),
-// 	new go.Binding("adjusting", "adjusting").makeTwoWay(),
-// 	GO(go.Shape, {strokeWidth:3}),
-// 	GO(go.Shape, {toArrow: "OpenTriangle", scale: 1.5}, new go.Binding("toArrow", "toArrow").makeTwoWay()),
-// 	GO(go.Panel, "Auto", 
-// 		{cursor: "move"},
-// 		GO(go.Shape, {
-// 			fill: GO(go.Brush, "Radial", {0: "rgb(240,240,240)", 0.3: "rgb(240, 240, 240)", 1: "rgba(240,240,240,0)"}),
-// 			stroke: null			
-// 		}), 
-// 		GO(go.TextBlock,
-// 		textStyle(), {
-// 			editable: true,
-// 			text: "数据流",
-// 			name: "LABEL"
-// 		}, new go.Binding("text", "text").makeTwoWay(),
-// 		new go.Binding("textAlign", "textAlign").makeTwoWay(),
-// 		new go.Binding("font", "font").makeTwoWay()),
-// 		new go.Binding("segmentOffset", "segmentOffset", go.Point.parse).makeTwoWay(go.Point.stringify)),
-// 	GO(go.Shape, {fromArrow: ""}, new go.Binding("fromArrow", "fromArrow").makeTwoWay())
-// );
-
-// var ben = 
-// 	GO(go.Link,
-// 	{curve: go.Link.Bezier,reshapable: true, resegmentable: true,
-//     toShortLength: 3},
-// 	new go.Binding("points").makeTwoWay(),
-// 	new go.Binding("curviness").makeTwoWay(),
-// 	GO(go.Shape, {strokeWidth:3}),
-// 	GO(go.Shape, {toArrow: "OpenTriangle", scale: 1.5}, new go.Binding("toArrow", "toArrow").makeTwoWay()),
-// 	GO(go.Panel, "Auto", 
-// 		{cursor: "move"},
-// 		GO(go.Shape, {
-// 			fill: GO(go.Brush, "Radial", {0: "rgb(240,240,240)", 0.3: "rgb(240, 240, 240)", 1: "rgba(240,240,240,0)"}),
-// 			stroke: null			
-// 		}), 
-// 		GO(go.TextBlock,
-// 		textStyle(), {
-// 			editable: true,
-// 			text: "数据流",
-// 			name: "LABEL"
-// 		}, new go.Binding("text", "text").makeTwoWay(),
-// 		new go.Binding("textAlign", "textAlign").makeTwoWay(),
-// 		new go.Binding("font", "font").makeTwoWay())
-// 		),
-// 	GO(go.Shape, {fromArrow: ""}, new go.Binding("fromArrow", "fromArrow").makeTwoWay())
-// );
-
-// myDiagram.linkTemplateMap.add('ben', ben);
-// myDiagram.linkTemplateMap.add('orth', orth);
 
 myDiagram.model = new go.GraphLinksModel(modelContent["nodeDataArray"], modelContent["linkDataArray"]);
-// myDiagram.model.linkFromPortIdProperty="fromPort";
-// myDiagram.model.linkToPortIdProperty="toPort";
+
 palette.nodeTemplateMap = myDiagram.nodeTemplateMap;
 
 palette.model.nodeDataArray = [
@@ -496,6 +446,7 @@ palette.model.nodeDataArray = [
 	{category: "structure", text: "数据存储"},
 	{category: "process", text: "加工"}
 ];
+// change node text to left align
 function leftAlign(){
 	myDiagram.commit(function(d) {
     d.selection.each(function(node) {
@@ -510,8 +461,8 @@ function leftAlign(){
       }
     });
   }, "ChangeTextAlign");
-	
 }
+// change node text to right align
 function rightAlign(){
 	myDiagram.commit(function(d) {
     d.selection.each(function(node) {
@@ -658,26 +609,17 @@ myDiagram.model.addChangedListener(function(evt) {
 	// 	// 		console.log(new Date().getTime() + " " + evt.propertyName + "  " + evt.oldValue + "  " + evt.newValue);
 	// 	// })
 	// }
-	// the codes up there is useless for this case but useful for other cases, so I want to keep them there
+	// the codes above is useless for this case but useful for other cases, so I want to keep them there
 
   var changes = evt.toString();
 	if (evt.object){
-    // console.log(evt.propertyName);
-    // console.log("part:");
     console.log(evt.object);
-    // console.log(evt.modelChange);
     if (evt.object.category){
       changes += " category: " + evt.object.category + " key: " + evt.object.key + " text: " + evt.object.text;
     } else if (evt.object.from) {
-      // console.log("nmsl");
       changes += " from: " + evt.object.from + " to: " + evt.object.to + " points: " + " text: " + (evt.object.text ? evt.object.text:"数据流");
-      // changes += " from: " + evt.object.from.toString() + " to: " evt.object.to.toString();
     }
 	}
-
-  // console.log(typeof(evt));
-  // console.log(evt.object.);
-	console.log(changes);
 	if (changes[0] === '*') {
 		startTimeStamp = new Date().getTime();
 		var SpeLog = {
@@ -712,10 +654,8 @@ function saveButton() {
 	dataJSON = dataJSON.replace(/\r\n/g, '');
 	dataJSON = dataJSON.replace(/\n/g, '');
 	dataJSON = dataJSON.replace(/\r/g, '');
-    // dataJSON = dataJSON.replace(/[\'\\\/\b\f\n\r\t]/g, '');
-    // dataJSON = dataJSON.replace(/[\"]/g, '\"');
-    var t = typeof dataJSON;
-    var base_url = window.location.pathname;
+  var t = typeof dataJSON;
+  var base_url = window.location.pathname;
     
 	$.ajax({
 		url: base_url + "/save",

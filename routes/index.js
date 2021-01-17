@@ -1,3 +1,4 @@
+// use express to call functions
 module.exports = function (app) {
 	app.use('/', function(req, res, next) {
 		next();

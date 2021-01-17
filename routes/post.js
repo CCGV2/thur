@@ -7,7 +7,6 @@ const post_controller = require('../controller/postController');
 
 router.get('/:postID', post_controller.index);
 
-
 router.post('/:postID/save', post_controller.save);
 
 router.post('/:postID/upload', post_controller.upload);
