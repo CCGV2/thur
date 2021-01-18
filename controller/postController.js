@@ -5,6 +5,7 @@ const dfd = require('../tools/dfd');
 
 let AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
 exports.index = (req, res) => {
+	// check whether this diagram is belong to this user.
 	var id = req.params.postID;
 	console.log("post index");
 	Diagram.findOne({_id:id}).exec(function(err, diagram) {
@@ -23,6 +24,7 @@ exports.index = (req, res) => {
 };
 
 exports.changeTitle = (req, res) => {
+	// change the title of specific diagram.
 	var newTitle = req.body.data;
 	var id = req.params.postID;
 	console.log("changeTitle")
@@ -51,6 +53,7 @@ exports.changeTitle = (req, res) => {
 
 exports.save = (req, res) => {
 	console.log("start to save");
+	// save diagram to database
 	var id = req.params.postID;
 	var content = req.body.data;
 	console.log(content);
@@ -84,6 +87,8 @@ exports.save = (req, res) => {
 }
 
 exports.remove = (req, res) => {
+	// remove a diagram. but didn't really delete it, just delete the connection between them.
+	// we can still access the diagram.
 	var id = req.params.postID;
 	console.log("remove");
 	console.log(id);
@@ -115,6 +120,7 @@ exports.remove = (req, res) => {
 
 
 exports.upload = (req, res) => {
+	// get the log and save.
 	console.log("upload");
 	var id = req.params.postID;
 	var content = req.body.data;

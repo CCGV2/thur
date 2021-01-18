@@ -7,6 +7,7 @@ var moment = require('moment');
 var publicPath = path.resolve(__dirname, '../public');
 
 function makeImg(element, index, array){
+	// make image on server for thumbnail.
 	fs.exists(path.resolve(__dirname, '../public', './img/' + element._id + '.png'), function(exist){
 		if (!exist){
 			console.log("不存在");
@@ -22,6 +23,7 @@ exports.index = (req, res) => {
 }
 
 exports.user_detail = (req, res) => {
+	// change the format from database to be used on front
 	var user = req.session.user;
 	console.log(user);
 	var target = User.findOne({"_id": user._id}).populate({path: 'models', select:'content title updatedAt'}).then(function(doc){
@@ -44,6 +46,7 @@ exports.user_detail = (req, res) => {
 }
 
 exports.user_new_diagram = (req, res) => {
+	// create a new blank picture for users and add it into database.
 	var user = req.session.user;
 	var fileName = req.body.filename;
 	var fileType = req.body.filetype;
