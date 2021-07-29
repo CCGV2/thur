@@ -7,7 +7,6 @@ let AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
 exports.index = (req, res) => {
 	// check whether this diagram is belong to this user.
 	var id = req.params.postID;
-	console.log("post index");
 	Diagram.findOne({_id:id}).exec(function(err, diagram) {
 		if (err) {
 			console.log('未找到该模型');

@@ -17,6 +17,7 @@ var myDiagram = GO(go.Diagram, "myDiagramDiv",{
 	"undoManager.isEnabled": true, // enable undo & redo
 	"panningTool.isEnabled": false
 });
+
 myDiagram.toolManager.mouseDownTools.add(GO(LinkShiftingTool));
 myDiagram.toolManager.mouseDownTools.add(myDiagram.toolManager.replaceTool("ContextMenu", null));
 myDiagram.toolManager.mouseMoveTools.insertAt(0, new LinkLabelDraggingTool());
@@ -438,7 +439,7 @@ myDiagram.linkTemplate = GO(go.Link,
 myDiagram.toolManager.linkingTool.archetypeLinkData={"text":"数据流"};
 
 myDiagram.model = new go.GraphLinksModel(modelContent["nodeDataArray"], modelContent["linkDataArray"]);
-
+myDiagram.model.linkKeyProperty="key";
 palette.nodeTemplateMap = myDiagram.nodeTemplateMap;
 
 palette.model.nodeDataArray = [
@@ -610,15 +611,18 @@ myDiagram.model.addChangedListener(function(evt) {
 	// 	// })
 	// }
 	// the codes above is useless for this case but useful for other cases, so I want to keep them there
-
-  var changes = evt.toString();
-	if (evt.object){
-    console.log(evt.object);
-    if (evt.object.category){
-      changes += " category: " + evt.object.category + " key: " + evt.object.key + " text: " + evt.object.text;
-    } else if (evt.object.from) {
-      changes += " from: " + evt.object.from + " to: " + evt.object.to + " points: " + " text: " + (evt.object.text ? evt.object.text:"数据流");
-    }
+	log = makeLogData(evt);
+	console.log(log);
+  	var changes = evt.toString();
+    if (evt.object){
+    // console.log(evt.object);
+		if (evt.object.category){
+		changes += " category: " + evt.object.category + " key: " + evt.object.key + " text: " + evt.object.text;
+		// console.log(" category: " + evt.object.category + " key: " + evt.object.key + " text: " + evt.object.text)
+		} else if (evt.object.from) {
+		changes += evt.object.key + " from: " + evt.object.from + " to: " + evt.object.to + " points: " + " text: " + (evt.object.text ? evt.object.text:"数据流");
+		// console.log(evt.object.key + " from: " + evt.object.from + " to: " + evt.object.to + " points: " + " text: " + (evt.object.text ? evt.object.text:"数据流"));
+		}
 	}
 	if (changes[0] === '*') {
 		startTimeStamp = new Date().getTime();

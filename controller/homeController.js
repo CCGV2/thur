@@ -86,9 +86,6 @@ exports.user_new_diagram = (req, res) => {
 				});
 			}
 		});
-		return res.json(200,{msg:"success",url:`/post/${file._id}`});
-		
-		
+		return res.json(200,{msg:"success",url:`/post/${file._id}`});	
 	})
-	//return res.redirect(`/home/${user._id}`);
 }

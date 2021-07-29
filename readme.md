@@ -14,11 +14,11 @@ lib下的mongo.js包含数据格式以及封装好的函数
 
 middlewares下是是否已登陆的验证
 
-models下也是数据格式
+models下也是数据格式，和上面的用途不一样所以代码格式不一样。
 
 public中存放一些资源，包括css、img、js、release。dfd.js就在此处
 
-routes中存放路由，就是一些跳转相关的支持
+routes中存放路由，就是一些跳转相关的支持，其中index是总路由，具体函数在各自的文件中。
 
 tools下的dfd.js是后端相关的gojs的操作，尽量和public下保持一致，但是不一致好像也没啥影响。
 缩略图相关的实现其实在这里，所以如果出现了问题优先怀疑这里。
