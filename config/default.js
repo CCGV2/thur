@@ -5,5 +5,8 @@ module.exports = {
     key: 'thur',
     maxAge: 2592000000
   },
-  mongodb:"mongodb://CCGV2:gengcongkai@62.234.114.20:27017/thur"
+  // the database I used.
+  //mongodb:"mongodb://CCGV2:gengcongkai@62.234.114.20:27017/thur"
+  // a local test database
+  mongodb:"mongodb://CCGV2:gengcongkai@127.0.0.1:27017/thur"
 };

@@ -1,4 +1,3 @@
-
 var GO = go.GraphObject.make;
 
 var logs = [];
@@ -17,7 +16,6 @@ var myDiagram = GO(go.Diagram, "myDiagramDiv",{
 	"undoManager.isEnabled": true, // enable undo & redo
 	"panningTool.isEnabled": false
 });
-
 myDiagram.toolManager.mouseDownTools.add(GO(LinkShiftingTool));
 myDiagram.toolManager.mouseDownTools.add(myDiagram.toolManager.replaceTool("ContextMenu", null));
 myDiagram.toolManager.mouseMoveTools.insertAt(0, new LinkLabelDraggingTool());
@@ -439,7 +437,7 @@ myDiagram.linkTemplate = GO(go.Link,
 myDiagram.toolManager.linkingTool.archetypeLinkData={"text":"数据流"};
 
 myDiagram.model = new go.GraphLinksModel(modelContent["nodeDataArray"], modelContent["linkDataArray"]);
-myDiagram.model.linkKeyProperty="key";
+
 palette.nodeTemplateMap = myDiagram.nodeTemplateMap;
 
 palette.model.nodeDataArray = [
@@ -593,55 +591,114 @@ function changeAdjust(str) {
 
 var startTimeStamp = new Date().getTime();
 var parentLog;
-myDiagram.model.addChangedListener(function(evt) {
-	// ignore unimportant Transaction events
-	
-	// if (evt.change === go.ChangedEvent.Transaction) {
-	// 	if (evt.propertyName === "CommittingTransaction" || evt.modelChange === "SourceChanged")
-	// 		return;
-	// 	//var txn = evt.object;
 
-	// 	var changes = evt.toString();
-	// 	console.log(changes);
-	// 	//console.log(txn.changes);
-	// 	// txn.changes.each(function(c) {
-	// 	// 	console.log(c.change);
-	// 	// 	if (c.change === go.ChangedEvent.Property)
-	// 	// 		console.log(new Date().getTime() + " " + evt.propertyName + "  " + evt.oldValue + "  " + evt.newValue);
-	// 	// })
+var totalChanges = [];
+
+myDiagram.model.addChangedListener(function(evt) {
+	if (evt.object && (evt.object.from || evt.object.key)){
+		// console.log("object");
+		var tx = evt.object;
+		if (tx.category)
+			totalChanges.push({'logTime':new Date().getTime(), 'objectKey': tx.key, 'objectType':tx.category, 'objectText':tx.text, 'propertyOld':evt.oldValue.toString(), 'propertyNew':evt.newValue.toString()});
+		else{
+			var newProperty = evt.oldValue, oldProperty=evt.newValue;
+			// console.log(Object.prototype.toString.call(newProperty))
+			if (newProperty.toArray){
+				newProperty = evt.oldValue.toArray().toString(), oldProperty=evt.newValue.toArray().toString();
+			}
+			totalChanges.push({'logTime':new Date().getTime(), 'objectKey': tx.from + ' ' + tx.to, 'objectType':'DataFlow', 'objectText':tx.text, 'propertyOld':oldProperty, 'propertyNew':newProperty});
+		}
+		// console.log(evt.object);
+	}
+	if (evt.isTransactionFinished){
+		
+		console.log(totalChanges);
+
+		console.log(evt.isComplete);
+		
+		console.log(evt.object);
+	}
+	if (evt.object instanceof go.Transaction){
+		if (evt.isTransactionFinished){
+
+
+			var chs = evt.object.changes;
+			console.log("chs:", chs);
+			console.log(chs.toArray()[0]);
+			var changes = chs.toArray();
+			var cnt = 0;
+
+			var firstkey, firsttype;
+			for (var i =0; i <chs.length; i++){
+				if (changes[i].object.key){
+					firstkey = changes[i].object.key;
+					firsttype = changes[i].object.category;
+				}else if (changes[i].object.from){
+					firstkey = changes[i].object.from + ' ' + changes[i].object.to;
+					firsttype = "DataFlow";
+				}
+			}
+			console.log(cnt);
+			var changehead = 0;
+			// get the first operation that makes a difference to the model.
+			for (; changehead < totalChanges.length; changehead++){
+				if (totalChanges[changehead].objectKey == firstkey && firsttype == totalChanges[changehead].objectType){
+					break;
+				}
+			}
+			var starttime = totalChanges[changehead].timeStamp;
+			var endtime = totalChanges[totalChanges.length-1].timeStamp;
+			if (changehead != 0){
+				addRolledBack(totalChanges.slice(0,changehead));
+			}
+			addLog(evt, totalChanges.slice(changehead))
+			totalChanges=[];
+		}
+		// console.log(evt.object);
+		// console.log(evt.object.changes);
+		evttimestamp = new Date().getTime();
+		// chs.each(function(c){
+		// 	console.log(c.object);
+		// 	console.log(c.propertyName, c.oldValue, c.newValue);
+		// })
+		// console.log(chs);
+		console.log(evt.isTransactionFinished);
+	}
+	// if (evt.isTransactionFinished){
+	// 	// console.log("model");
+	// 	console.log(evt);
+	// 	console.log(evt.changes);
+	// 	// console.log(typeof evt.change)
+	// 	if (evt.Transaction)
+	// 	console.log(evt.changes);
 	// }
-	// the codes above is useless for this case but useful for other cases, so I want to keep them there
-	log = makeLogData(evt);
-	console.log(log);
-  	var changes = evt.toString();
-    if (evt.object){
-    // console.log(evt.object);
-		if (evt.object.category){
-		changes += " category: " + evt.object.category + " key: " + evt.object.key + " text: " + evt.object.text;
-		// console.log(" category: " + evt.object.category + " key: " + evt.object.key + " text: " + evt.object.text)
-		} else if (evt.object.from) {
-		changes += evt.object.key + " from: " + evt.object.from + " to: " + evt.object.to + " points: " + " text: " + (evt.object.text ? evt.object.text:"数据流");
-		// console.log(evt.object.key + " from: " + evt.object.from + " to: " + evt.object.to + " points: " + " text: " + (evt.object.text ? evt.object.text:"数据流"));
-		}
-	}
-	if (changes[0] === '*') {
-		startTimeStamp = new Date().getTime();
-		var SpeLog = {
-			"content" : changes,
-			"level" : 'A',
-			"timeStamp": startTimeStamp,
-			"parentLog": startTimeStamp
-		};
-		logs.push(SpeLog);
-	} else {
-		var SpeLog = {
-			"content": changes,
-			"level": 'B',
-			"timeStamp": new Date().getTime(),
-			"parentLog": startTimeStamp
-		}
-		logs.push(SpeLog);
-	}
+//   var changes = evt.toString();
+// 	if (evt.object){
+//     console.log(evt.object);
+//     if (evt.object.category){
+//       changes += " category: " + evt.object.category + " key: " + evt.object.key + " text: " + evt.object.text;
+//     } else if (evt.object.from) {
+//       changes += " from: " + evt.object.from + " to: " + evt.object.to + " points: " + " text: " + (evt.object.text ? evt.object.text:"数据流");
+//     }
+// 	}
+// 	if (changes[0] === '*') {
+// 		startTimeStamp = new Date().getTime();
+// 		var SpeLog = {
+// 			"content" : changes,
+// 			"level" : 'A',
+// 			"timeStamp": startTimeStamp,
+// 			"parentLog": startTimeStamp
+// 		};
+// 		logs.push(SpeLog);
+// 	} else {
+// 		var SpeLog = {
+// 			"content": changes,
+// 			"level": 'B',
+// 			"timeStamp": new Date().getTime(),
+// 			"parentLog": startTimeStamp
+// 		}
+// 		logs.push(SpeLog);
+// 	}
 })
 zoomSlider = new ZoomSlider(myDiagram, {
     alignment: go.Spot.BottomLeft, alignmentFocus: go.Spot.BottomLeft,
