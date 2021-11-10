@@ -1,17 +1,13 @@
+
 const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
 
 const logSchema = new Schema({
-	logID: {type: Number},
-	belongOpe: {type: Number},
-	objectKey: {type: 'string'},
-	objectType: {type: 'string'},
-	objectText: {type: 'string'},
-	logTime: {type: Number},
-	propertyOld: {type: 'string'},
-	propertyNew: {type: 'string'},
-	eventID: {type:'string'},
+	opeID: {type: Number},
+	opeType: {type: "string"},
+	startTime: {type: Number},
+    endTime:  {type: Number},
 	author: { type: mongoose.Types.ObjectId, ref:'user' },
 	model: { type: mongoose.Types.ObjectId, ref:'diagram' }
 },{timestamps:true});

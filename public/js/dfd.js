@@ -296,7 +296,54 @@ var processTemplate = GO(go.Node, "Auto",{
 	}
     ); // end node
 	// three named ports, one on each side except the bottom, all input only:
-
+myDiagram.addDiagramListener("ViewportBoundsChanged",function(evt){
+	addEvent("ChangeViewPoint", new Date().getTime())
+})
+myDiagram.addDiagramListener("ClipboardChanged",
+	function(evt){
+		// evt.oldValue
+		var subjects = evt.subject.toArray();
+		console.log(subjects);
+		// console.log(evt.subject.toString());
+		var nodearray = [];
+		var linkarray = [];
+		for (var i = 0; i < subjects.length; i++){
+			var tx = subjects[i].Ud;
+			if (tx.key){
+				nodearray.push(tx.key);
+			}else{
+				linkarray.push({"from":tx.from, "to":tx.to})
+			}
+		}
+		var valueJson = {"link":linkarray,"node":nodearray};
+		var valueStr = JSON.stringify(valueJson)
+		addEvent("EditClipboard", new Date().getTime(), valueStr)
+		console.log(valueStr)
+	}
+)
+myDiagram.addDiagramListener("ChangedSelection",
+	function(evt){
+		// evt.oldValue
+		console.log(evt.object);
+		var subjects = myDiagram.selection.toArray();
+		console.log(myDiagram.selection);
+		// console.log(evt.subject.toString());
+		var nodearray = [];
+		var linkarray = [];
+		for (var i = 0; i < subjects.length; i++){
+			var tx = subjects[i].Ud;
+			if (tx.key){
+				nodearray.push(tx.key);
+			}else{
+				linkarray.push({"from":tx.from, "to":tx.to})
+			}
+		}
+		var valueJson = {"link":linkarray,"node":nodearray};
+		var valueStr = JSON.stringify(valueJson)
+		addEvent("EditSelected", new Date().getTime(), valueStr)
+		console.log(valueStr)
+	}
+)
 myDiagram.contextMenu =
     GO("ContextMenu",
       GO("ContextMenuButton",
@@ -594,6 +641,13 @@ var parentLog;
 
 var totalChanges = [];
 
+window.addEventListener('blur',function(){
+	addEvent("ExitPage", new Date().getTime())
+})
+window.addEventListener('focus',function(){
+	addEvent("EnterPage", new Date().getTime())
+})
+
 myDiagram.model.addChangedListener(function(evt) {
 	if (evt.object && (evt.object.from || evt.object.key)){
 		// console.log("object");
@@ -601,17 +655,41 @@ myDiagram.model.addChangedListener(function(evt) {
 		if (tx.category)
 			totalChanges.push({'logTime':new Date().getTime(), 'objectKey': tx.key, 'objectType':tx.category, 'objectText':tx.text, 'propertyOld':evt.oldValue.toString(), 'propertyNew':evt.newValue.toString()});
 		else{
-			var newProperty = evt.oldValue, oldProperty=evt.newValue;
-			// console.log(Object.prototype.toString.call(newProperty))
-			if (newProperty.toArray){
-				newProperty = evt.oldValue.toArray().toString(), oldProperty=evt.newValue.toArray().toString();
+			var newProperty=evt.newValue, oldProperty=evt.oldValue;
+			if (oldProperty && oldProperty.toArray){
+				oldProperty = oldProperty.toArray().toString();
+			}else if (oldProperty){
+				oldProperty = oldProperty.toString();
 			}
+			if (newProperty && newProperty.toArray){
+				newProperty = newProperty.toArray().toString();
+			}else if (newProperty){
+				newProperty = newProperty.toString();
+			}
+			// console.log(Object.prototype.toString.call(newProperty))
 			totalChanges.push({'logTime':new Date().getTime(), 'objectKey': tx.from + ' ' + tx.to, 'objectType':'DataFlow', 'objectText':tx.text, 'propertyOld':oldProperty, 'propertyNew':newProperty});
 		}
 		// console.log(evt.object);
 	}
 	if (evt.isTransactionFinished){
 		
+		console.log(evt.oldValue);
+		if (evt.oldValue == "TextEditing"){
+			var tx = myDiagram.selection.first().Ud;
+			var txkey;
+			var txtype;
+			if (tx.key){
+				txkey = tx.key;
+				txtype = tx.category;
+			}else{
+				txkey = tx.from + " " + tx.to;
+				txtype = "DataFlow";
+			}
+			addEvent("EndEditing", new Date().getTime(), null, txtype, txkey);
+			// console.log(myDiagram.selection.first().Ud)
+		}
+		console.log(evt.Transaction);
+		// addEvent("StartEditing", new Date().getTime())
 		console.log(totalChanges);
 
 		console.log(evt.isComplete);
@@ -708,6 +786,8 @@ zoomSlider = new ZoomSlider(myDiagram, {
 setInterval(save, 10000);
 setInterval(upload, 10000);
 function saveButton() {
+	var timeStamp = new Date().getTime();
+	addEvent("SaveButton", timeStamp);
 	if (!myDiagram.isModified){
 		return ;
 	}
@@ -715,9 +795,9 @@ function saveButton() {
 	dataJSON = dataJSON.replace(/\r\n/g, '');
 	dataJSON = dataJSON.replace(/\n/g, '');
 	dataJSON = dataJSON.replace(/\r/g, '');
-  var t = typeof dataJSON;
-  var base_url = window.location.pathname;
-    
+  	var t = typeof dataJSON;
+  	var base_url = window.location.pathname;
+	
 	$.ajax({
 		url: base_url + "/save",
 		data: {'data': dataJSON},
@@ -764,7 +844,8 @@ function upload(){
 	if (logs.length === 0){
 		return ;
 	}
-	var logJSON = JSON.stringify(logs);
+	var tables = {"ope":table1,"log":table2,"event":table3}
+	var logJSON = JSON.stringify(tables);
 	
     var base_url = window.location.pathname;
 	$.ajax({
@@ -775,8 +856,9 @@ function upload(){
 		contentType: "application/x-www-form-urlencoded",
 		timeout: 2000,
 		success: function(response){
-			logJSON = [];
-			logs = [];
+			table1=[],
+			table2=[],
+			table3=[]
 		}
 	})
 }
@@ -789,6 +871,7 @@ function download(dataurl, filename) {
 }
 
 function printDiagram(str) {
+	addEvent("Export", new Data().getTime())
 	if (str == 'pdf') {
 		var svgWindow = window.open();
 		if (!svgWindow) return;  // failure to open a new Window

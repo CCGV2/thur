@@ -6,7 +6,10 @@ const diagramSchema = new Schema({
 	author: { type: mongoose.Schema.Types.ObjectId, ref: 'user'},
 	title: { type: 'string', required: true},
 	type: { type: 'string', enum: ['dfd', 'ucd', 'uml'], default: 'dfd'},
-	content: { type: 'string' }
+	content: { type: 'string' },
+	opecnt: {type: Number},
+	logcnt: {type: Number},
+	eventcnt: {type: Number}
 },{timestamps:true})
 
 diagramSchema.index({ author: 1, _id: -1 });

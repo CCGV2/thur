@@ -8,7 +8,7 @@ textLog = [];
 fields:
 table1: opeID, opeType, startTime, endTime
 table2: logID, belongOpe, objectKey, objectType, objectText, logTime, propertyOld, propertyNew, eventID
-table3: eventID, eventType, eventTime, eventOld, eventNew, objectType, objectKey
+table3: eventID, eventType, eventTime, eventValue, objectType, objectKey
  */
 table1 = []
 table2 = []
@@ -58,7 +58,8 @@ function addLog(evt, changes){
             addOpe(table1.length, "input text", changes[0].logTime, changes[changes.length - 1].logTime)
             break;
         case "TextEditing":
-            addOpe(table1.length, "TextEditing", changes[0].logTime, changes[changes.length - 1].logTime)
+            // addOpe(table1.length, "TextEditing", changes[0].logTime, changes[changes.length - 1].logTime)
+            
             break;
         default:
             addOpe(table1.length, opeType, changes[0].logTime, changes[changes.length - 1].logTime)
@@ -73,7 +74,16 @@ function addLog(evt, changes){
 function addOpe(ID, Type, starttime, endtime){
     table1.push({"opeId":startlog + table1.length, "opeType":Type, "startTime":starttime, "endTime":endtime})
 }
-function addEvent(){
+function addEvent(eventType, eventTime, eventValue, objectType, objectKey){
+    switch(eventType){
+        case "SaveButton":
+            table3.push({"eventID":table3.length, "eventType":eventType, "eventTime":eventTime, "eventValue":null, "objectType":null, "objectKey":null})        
+            break;
+        default:
+            table3.push({"eventID":table3.length, "eventType":eventType, "eventTime":eventTime, "eventValue":eventValue, "objectType":objectType, "objectKey":objectKey})
+            break;
+    }
+    
 }
 
 function addRolledBack(logs){
@@ -107,39 +117,4 @@ function makeLogData(event){
     }else{
         console.log(event);
     }
-    // console.log(event.Transaction);
-    // console.log(opeLog);
-    // if (event.isTransactionFinished){
-    //     console.log("opeLog:");
-    //     console.log(opeLog);
-    //     if (routeLog.length != 0 && (event.oldValue == "ExternalCopy")){
-    //         console.log("AddLog!!!");
-    //         // addOpe();
-    //         addLog();
-    //         routeLog = [];
-    //         opeLog = [];
-    //     }else if (routeLog.length != 0){
-    //         console.log("AddRolledBack!!!!");
-    //         addRolledBack(routeLog);
-    //         routeLog = [];
-    //     }else if (event.oldValue == "input text"){
-    //         console.log("inputText");
-    //         textLog += opeLog;
-    //     }else if (event.oldValue == "TextEditing"){
-    //         if (textLog.length != 0){
-    //             addLog();
-    //         }else{
-    //             addEvent();
-    //         }
-    //     }
-    //     else {
-    //         addLog();
-    //     }
-    //     opeLog = [];
-    //     opeId += 1;
-    // }else if (event.propertyName == "nodeDataArray" && event.newValue == null && opeLog[0].logPropertyName != "StartedTransaction"){
-    //     routeLog = opeLog;
-    //     routeOpeId = opeId;
-    //     opeLog = [];
-    // }
 }
