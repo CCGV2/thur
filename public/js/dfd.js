@@ -841,8 +841,8 @@ function save() {
 }
 
 function upload(){
-	if (logs.length === 0){
-		return ;
+	if (table1.length + table2.length + table3.length == 0){
+		return;
 	}
 	var tables = {"ope":table1,"log":table2,"event":table3}
 	var logJSON = JSON.stringify(tables);
@@ -856,9 +856,13 @@ function upload(){
 		contentType: "application/x-www-form-urlencoded",
 		timeout: 2000,
 		success: function(response){
-			table1=[],
-			table2=[],
+			console.log(response)
+			table1=[]
+			table2=[]
 			table3=[]
+		},
+		err: function(response){
+			console.log("upload failed");
 		}
 	})
 }

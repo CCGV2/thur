@@ -1,5 +1,7 @@
 const User = require('../models/user');
 const Diagram = require('../models/diagram');
+const Event = require('../models/event');
+const Ope = require('../models/ope');
 const Log = require('../models/log');
 const dfd = require('../tools/dfd');
 
@@ -26,9 +28,7 @@ exports.changeTitle = (req, res) => {
 	// change the title of specific diagram.
 	var newTitle = req.body.data;
 	var id = req.params.postID;
-	console.log("changeTitle")
 	Diagram.findOne({_id:id}).exec(function(err, diagram) {
-		console.log("233");
 		if (err) {
 			req.flash('error', 'failed');
 			return res.redirect('back');
@@ -44,26 +44,20 @@ exports.changeTitle = (req, res) => {
 			if (err) {
 				console.log(err);
 			}
-			console.log('success changeTitle');
 			return res.json({success:true});
 		})
 	})
 }
 
 exports.save = (req, res) => {
-	console.log("start to save");
 	// save diagram to database
 	var id = req.params.postID;
 	var content = req.body.data;
-	console.log(content);
 	Diagram.findOne({_id:id}).exec(function(err, diagram) {
-		console.log("233");
 		if (err) {
 			req.flash('error', 'failed');
 			return res.redirect('back');
 		}
-		// console.log(diagram.author)
-		// console.log(req.session.user._id)
 		if (req.session.user._id != diagram.author) {
 			req.flash('error', '模型与作者不匹配');
 			return res.send("error");
@@ -77,7 +71,6 @@ exports.save = (req, res) => {
 				console.log(err);
 			}
 			dfd.makeImg(diagram, function(){});
-			// console.log('success save');
 			req.flash('success', '保存成功');
 			req.session.content = diagram.content;
 			return res.json({success:true});
@@ -89,9 +82,6 @@ exports.remove = (req, res) => {
 	// remove a diagram. but didn't really delete it, just delete the connection between them.
 	// we can still access the diagram.
 	var id = req.params.postID;
-	console.log("remove");
-	console.log(id);
-	console.log(req.session.user.models);
 	var index = -1;
 	for (var i = 0; i < req.session.user.models.length; i++){
 		if (req.session.user.models[i]._id === id){
@@ -100,9 +90,7 @@ exports.remove = (req, res) => {
 		}
 	}
 	if (index > -1) {
-		console.log(req.session.user.models);
 		req.session.user.models.splice(index, 1);
-		console.log(req.session.user.models);
 		User.updateOne({"_id":req.session.user._id}, {$pull:{models:id}}, function(err){
 			if (err) {
 				console.log(err);
@@ -112,43 +100,95 @@ exports.remove = (req, res) => {
 	}else{
 		return res.redirect(`/home/${req.session.user._id}`);
 	}
-	console.log(req.session.user.models);
-	
 }
-
-
 
 exports.upload = (req, res) => {
 	// get the log and save.
-	console.log("upload");
 	var id = req.params.postID;
 	var content = req.body.data;
 	var logDiagram = id;
 	var logAuthor = req.session.user._id;
+	
 	var contentArray = JSON.parse(content);
-	//console.log(contentArray);
-	var cnt = 0;
-	var err;
-	function upLoadToDb(file){
-		return new Promise((resolve, reject) => {
-			var doc = ({
-				author:logAuthor,
-				model:logDiagram,
-				content:JSON.stringify(file)
-			});
-			Log.create(doc, function(err, docs){
-				if (err) {
-					err = err;
+
+	var opes = contentArray.ope;
+	var logs = contentArray.log;
+	var events = contentArray.event;
+	var modelData = Diagram.findByIdAndUpdate(id,{$inc:{opecnt:opes.length, logcnt:logs.length, eventcnt:events.length}},function(err, doc){
+		if (err){
+			req.flash('error', 'failed');
+			return res.redirect('back');
+		}
+		var putope = new Promise((resolve, reject) => {
+			var tmp = 0;
+			if (opes.length == 0){
+				resolve();
+			}
+			opes.forEach((ope)=>{
+				ope.opeID += doc.opecnt;
+				ope.model = id;
+				tmp += 1;
+				if (tmp == opes.length){
+					Ope.insertMany(opes, function(error, doc){
+						if (error){
+							reject(error);
+							return ;
+						}
+						resolve(doc);
+					})
 				}
 			})
-			resolve(file);
 		})
-		
-	}
-	let promiseArray = contentArray.map(upLoadToDb);
-	Promise.all(promiseArray).then(result => {
-		if (err) return res.json({err: err});
-		else return res.json({success: true});
-	})
-
+		var putlog = new Promise((resolve, reject) => {
+			var tmp = 0;
+			if (logs.length == 0){
+				resolve();
+			}
+			logs.forEach((log)=>{
+				log.logID += doc.logcnt;
+				log.belongOpe += doc.opecnt;
+				log.model = id;
+				tmp += 1;
+				if (log.eventID){
+					log.eventID += doc.eventcnt;
+				}
+				if (tmp == logs.length){
+					Log.insertMany(logs, function(error, doc){
+						if (error){
+							reject(error);
+							return ;
+						}
+						resolve(doc);
+					})
+				}
+			})
+		})
+		var putevent = new Promise((resolve, reject) => {
+			var tmp = 0;
+			if (events.length == 0){
+				resolve();
+			}
+			events.forEach((event)=>{
+				event.eventID += doc.eventcnt;
+				event.model = id;
+				tmp += 1;
+				if (tmp == events.length){
+					Event.insertMany(events, function(error, doc){
+						if (error){
+							reject(error);
+							return ;
+						}
+						resolve(doc);
+					})
+				}
+			})
+		})
+		Promise.all([putope, putlog, putevent])
+		.then(doc => {
+			return res.json({success: true});
+		})
+		.catch(err => {
+			return res.json({err: err})
+		})
+	});
 }

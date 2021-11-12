@@ -7,9 +7,9 @@ const diagramSchema = new Schema({
 	title: { type: 'string', required: true},
 	type: { type: 'string', enum: ['dfd', 'ucd', 'uml'], default: 'dfd'},
 	content: { type: 'string' },
-	opecnt: {type: Number},
-	logcnt: {type: Number},
-	eventcnt: {type: Number}
+	opecnt: {type: Number, default:0},
+	logcnt: {type: Number, default:0},
+	eventcnt: {type: Number, default:0}
 },{timestamps:true})
 
 diagramSchema.index({ author: 1, _id: -1 });

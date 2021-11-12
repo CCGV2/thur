@@ -54,7 +54,10 @@ exports.user_new_diagram = (req, res) => {
 		author : user._id,
 		title: fileName,
 		type: fileType,
-		content: '{"nodeDataArray":[], "linkDataArray":[]}'
+		content: '{"nodeDataArray":[], "linkDataArray":[]}',
+		opecnt:0,
+		logcnt:0,
+		eventcnt:0
 	};
 	Diagram.create(file, function(err, file) {
 		if (err) {

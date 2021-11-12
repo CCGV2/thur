@@ -12,7 +12,6 @@ const logSchema = new Schema({
 	propertyOld: {type: 'string'},
 	propertyNew: {type: 'string'},
 	eventID: {type:'string'},
-	author: { type: mongoose.Types.ObjectId, ref:'user' },
 	model: { type: mongoose.Types.ObjectId, ref:'diagram' }
 },{timestamps:true});
 
