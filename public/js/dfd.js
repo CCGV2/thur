@@ -62,17 +62,6 @@ function textStyle() {
 	}
 }
 // Not useful anymore.
-function clickLog(e, obj) {
-	var hehe = new Date().getTime();
-	var content = "" + obj.data.category + " " + obj.data.text + " clicked";
-	var SpeLog = {
-			"content" : content,
-			"level" : 'C',
-			"timeStamp": hehe,
-			"parentLog": hehe
-		};
-	logs.push(SpeLog);
-}
 // make port for nodes
 function makePort(name, spot, output, input) {
     // the port is basically just a small transparent square
@@ -90,15 +79,14 @@ function makePort(name, spot, output, input) {
 	});
 }
 
-var entityTemplate = GO(go.Node, "Auto", nodeStyle(),{
-	click:clickLog, resizable: true, desiredSize:new go.Size(100, 50)},
+var entityTemplate = GO(go.Node, "Auto", nodeStyle(),{resizable: true, desiredSize:new go.Size(100, 50)},
 	new go.Binding("desiredSize", "size", go.Size.parse).makeTwoWay(go.Size.stringify),
         // the main object is a Panel that surrounds a TextBlock with a rectangular Shape
     {
     	fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
         // fromLinkable: true, toLinkable: true,
         fromLinkableDuplicates: true,toLinkableDuplicates:true,
-        locationSpot: go.Spot.Center,
+        locationSpot: go.Spot.Center
         // cursor: "crosshair"
     },
 	GO(go.Panel, "Auto", 
@@ -162,8 +150,7 @@ function showSmallPorts(node, show) {
 		}
 	});
 }	
-var processTemplate = GO(go.Node, "Auto",{
-		click: clickLog,resizable: true, desiredSize:new go.Size(70, 70)
+var processTemplate = GO(go.Node, "Auto",{resizable: true, desiredSize:new go.Size(70, 70)
 	}, nodeStyle(),new go.Binding("desiredSize", "size", go.Size.parse).makeTwoWay(go.Size.stringify),
 	{
     	fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
@@ -225,7 +212,6 @@ var processTemplate = GO(go.Node, "Auto",{
         // fromLinkable: true, toLinkable: true,
         fromLinkableDuplicates: true,toLinkableDuplicates:true,
         locationSpot: go.Spot.Center,
-        click:clickLog,
         resizable: true, desiredSize: new go.Size(70, 50)
 	  },new go.Binding("desiredSize", "size", go.Size.parse).makeTwoWay(go.Size.stringify),
         GO(go.Panel, "Vertical",
@@ -590,7 +576,6 @@ function italicText(){
 					fontStr = 'italic ' + fontStr;
 				}
 				shape.font = fontStr;
-				console.log(shape.font);
 			}
 		})
 	}, "ChangeTextItalic");
@@ -628,7 +613,6 @@ function changeAdjust(str) {
 	myDiagram.commit(function(d) {
 		d.selection.each(function(node) {
 			if (node instanceof go.Link) {
-				console.log(node.data.category);
 				d.model.set(node.data, "category", str);
 			}
 		})
@@ -650,7 +634,6 @@ window.addEventListener('focus',function(){
 
 myDiagram.model.addChangedListener(function(evt) {
 	if (evt.object && (evt.object.from || evt.object.key)){
-		// console.log("object");
 		var tx = evt.object;
 		if (tx.category)
 			totalChanges.push({'logTime':new Date().getTime(), 'objectKey': tx.key, 'objectType':tx.category, 'objectText':tx.text, 'propertyOld':evt.oldValue.toString(), 'propertyNew':evt.newValue.toString()});
@@ -666,14 +649,11 @@ myDiagram.model.addChangedListener(function(evt) {
 			}else if (newProperty){
 				newProperty = newProperty.toString();
 			}
-			// console.log(Object.prototype.toString.call(newProperty))
 			totalChanges.push({'logTime':new Date().getTime(), 'objectKey': tx.from + ' ' + tx.to, 'objectType':'DataFlow', 'objectText':tx.text, 'propertyOld':oldProperty, 'propertyNew':newProperty});
 		}
-		// console.log(evt.object);
 	}
 	if (evt.isTransactionFinished){
 		
-		console.log(evt.oldValue);
 		if (evt.oldValue == "TextEditing"){
 			var tx = myDiagram.selection.first().Ud;
 			var txkey;
@@ -688,13 +668,6 @@ myDiagram.model.addChangedListener(function(evt) {
 			addEvent("EndEditing", new Date().getTime(), null, txtype, txkey);
 			// console.log(myDiagram.selection.first().Ud)
 		}
-		console.log(evt.Transaction);
-		// addEvent("StartEditing", new Date().getTime())
-		console.log(totalChanges);
-
-		console.log(evt.isComplete);
-		
-		console.log(evt.object);
 	}
 	if (evt.object instanceof go.Transaction){
 		if (evt.isTransactionFinished){
@@ -732,51 +705,9 @@ myDiagram.model.addChangedListener(function(evt) {
 			addLog(evt, totalChanges.slice(changehead))
 			totalChanges=[];
 		}
-		// console.log(evt.object);
-		// console.log(evt.object.changes);
 		evttimestamp = new Date().getTime();
-		// chs.each(function(c){
-		// 	console.log(c.object);
-		// 	console.log(c.propertyName, c.oldValue, c.newValue);
-		// })
-		// console.log(chs);
 		console.log(evt.isTransactionFinished);
 	}
-	// if (evt.isTransactionFinished){
-	// 	// console.log("model");
-	// 	console.log(evt);
-	// 	console.log(evt.changes);
-	// 	// console.log(typeof evt.change)
-	// 	if (evt.Transaction)
-	// 	console.log(evt.changes);
-	// }
-//   var changes = evt.toString();
-// 	if (evt.object){
-//     console.log(evt.object);
-//     if (evt.object.category){
-//       changes += " category: " + evt.object.category + " key: " + evt.object.key + " text: " + evt.object.text;
-//     } else if (evt.object.from) {
-//       changes += " from: " + evt.object.from + " to: " + evt.object.to + " points: " + " text: " + (evt.object.text ? evt.object.text:"数据流");
-//     }
-// 	}
-// 	if (changes[0] === '*') {
-// 		startTimeStamp = new Date().getTime();
-// 		var SpeLog = {
-// 			"content" : changes,
-// 			"level" : 'A',
-// 			"timeStamp": startTimeStamp,
-// 			"parentLog": startTimeStamp
-// 		};
-// 		logs.push(SpeLog);
-// 	} else {
-// 		var SpeLog = {
-// 			"content": changes,
-// 			"level": 'B',
-// 			"timeStamp": new Date().getTime(),
-// 			"parentLog": startTimeStamp
-// 		}
-// 		logs.push(SpeLog);
-// 	}
 })
 zoomSlider = new ZoomSlider(myDiagram, {
     alignment: go.Spot.BottomLeft, alignmentFocus: go.Spot.BottomLeft,

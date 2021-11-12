@@ -12,12 +12,8 @@ const parseDataUrl = (dataUrl) => {
 
 
 exports.makeImg = async function makeImg(diagram, callback){
-	console.log("makeImg diagram:");
-	console.log(diagram);
-	console.log(diagram.content);
 	const browser = await puppeteer.launch();
 	const page = await browser.newPage();
-
 	await page.addScriptTag({
 		path: 'public/release/go-debug.js'
 	});
@@ -27,11 +23,11 @@ exports.makeImg = async function makeImg(diagram, callback){
 	await page.addScriptTag({
 		path: 'public/release/LinkShiftingTool.js'
 	});
+	
 
 	page.setContent('<div id="myDiagramDiv" style="border: solid 1px black; width:1600px; height:1200px"></div>');
 
 	const imageData = await page.evaluate((diagram) =>{
-		console.log('NMSL');
 		var GO = go.GraphObject.make;
 		
 
@@ -65,153 +61,121 @@ exports.makeImg = async function makeImg(diagram, callback){
 				stroke: "black"
 			}
 		}
-		function makePort(name, align, spot, output, input) {
-			var horizontal = align.equals(go.Spot.Top) || align.equals(go.Spot.Bottom);
-			// the port is basically just a transparent rectangle that stretches along the side of the node,
-			// and becomes colored when the mouse passes over it
-			return GO(go.Shape, {
-				fill: "transparent",
-				// changed to a color in the mouseEnter event handler
-				strokeWidth: 0,
-				// no stroke
-				width: horizontal ? NaN: 8,
-				// if not stretching horizontally, just 8 wide
-				height: !horizontal ? NaN: 8,
-				// if not stretching vertically, just 8 tall
-				alignment: align,
-				// align the port on the main Shape
-				stretch: (horizontal ? go.GraphObject.Horizontal: go.GraphObject.Vertical),
-				portId: name,
-				// declare this object to be a "port"
-				fromSpot: spot,
-				// declare where links may connect at this port
-				fromLinkable: output,
-				// declare whether the user may draw links from here
-				toSpot: spot,
-				// declare where links may connect at this port
-				toLinkable: input,
-				// declare whether the user may draw links to here
-				cursor: "pointer",
-				// show a different cursor to indicate potential link point
-				mouseEnter: function(e, port) { // the PORT argument will be this Shape
-				    if (!e.diagram.isReadOnly) port.fill = "rgba(255,0,255,0.5)";
-				},
-				mouseLeave: function(e, port) {
-				    port.fill = "transparent";
-				}
+		function makePort(name, spot, output, input) {
+			// the port is basically just a small transparent square
+			return GO(go.Shape, "Circle",
+			{
+				fill: null,  // not seen, by default; set to a translucent gray by showSmallPorts, defined below
+				stroke: null,
+				desiredSize: new go.Size(8, 8),
+				alignment: spot,  // align the port on the main Shape
+				alignmentFocus: spot,  // just inside the Shape
+				portId: name,  // declare this object to be a "port"
+				fromSpot: spot, toSpot: spot,  // declare where links may connect at this port
+				fromLinkable: output, toLinkable: input,  // declare whether the user may draw links to/from here
+				cursor: "pointer"  // show a different cursor to indicate potential link point
 			});
 		}
 
 
-		var entityTemplate = GO(go.Node, "Auto", nodeStyle(),{
-			click:function(e, obj){
-				//inspector.inspectObject(obj.data);
-			}},
-		        // the main object is a Panel that surrounds a TextBlock with a rectangular Shape
-		    {
-		    	fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
-		        fromLinkable: true, toLinkable: true,
-		        locationSpot: go.Spot.Center
-		    },
+		
+		var entityTemplate = GO(go.Node, "Auto", nodeStyle(),{resizable: true, desiredSize:new go.Size(100, 50)},
+			new go.Binding("desiredSize", "size", go.Size.parse).makeTwoWay(go.Size.stringify),
+			{
+				fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
+				fromLinkableDuplicates: true,toLinkableDuplicates:true,
+				locationSpot: go.Spot.Center
+			},
 			GO(go.Panel, "Auto", 
 				GO(go.Shape, "Rectangle",
 				{ fill: "transparent", strokeWidth: 2, stroke: "black"},
 				new go.Binding("figure", "figure")),
 				GO(go.TextBlock, textStyle(),{
 					margin: 8,
-					maxSize: new go.Size(160, NaN),
 					wrap: go.TextBlock.WrapFit,
 					editable: true,
 					fromLinkable:false,
-					toLinkable:false
+					toLinkable:false,
+					cursor: "default", 
+					alignment: go.Spot.Center,
+					textAlign: "left",
+					text: "外部实体",
+					name: "LABEL"
 				},
-				new go.Binding("text", "文本").makeTwoWay(),
-
-			))
+				new go.Binding("text", "text").makeTwoWay(),
+				new go.Binding("textAlign", "textAlign").makeTwoWay(),
+				new go.Binding("font", "font").makeTwoWay()
+			)),
+			makePort("T", go.Spot.Top, true, true),
+			makePort("L", go.Spot.Left, true, true),
+			makePort("R", go.Spot.Right, true, true),
+			makePort("B", go.Spot.Bottom, true, true)
 		);
-		var processTemplate = GO(go.Node, "Auto",{
-				click:function(e, obj){
-					//inspector.inspectObject(obj.data);
-				}
-			}, nodeStyle(),
+		var processTemplate = GO(go.Node, "Auto",{resizable: true, desiredSize:new go.Size(70, 70)
+			}, nodeStyle(),new go.Binding("desiredSize", "size", go.Size.parse).makeTwoWay(go.Size.stringify),
 			{
-		    	fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
-		        fromLinkable: true, toLinkable: true,
-		        locationSpot: go.Spot.Center
-		    }, GO(go.Panel, "Auto", GO(go.Shape, "Circle", {
+				fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
+				fromLinkableDuplicates: true,toLinkableDuplicates:true,
+				locationSpot: go.Spot.Center
+			}, GO(go.Panel, "Auto", GO(go.Shape, "Circle", {
 				minSize: new go.Size(40, 40),
 				fill: "transparent",
 				strokeWidth: 2
 			}), GO(go.TextBlock, textStyle(), {
 				margin: 8,
-				
+				cursor: "default",
 				wrap: go.TextBlock.WrapFit,
 				editable: true,
 				fromLinkable:false,
-				toLinkable:false
-			},new go.Binding("text", "文本").makeTwoWay())))
-			// three named ports, one on each side except the top, all output only:;
-		// var structureTemplate = GO(go.Node, "Auto",{click:function(e, obj){
-		// 	//	inspector.inspectObject(obj.data);
-		// 	}},nodeStyle(), {
-		//     	fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
-		//         fromLinkable: true, toLinkable: true,
-		//         locationSpot: go.Spot.Center
-		//     }, GO(go.Panel, "Vertical", {margin: 5}, 
-		// 	GO(go.Panel, "Auto", 
-		// 		GO(go.Shape, "LineH", {
-		// 			minSize: new go.Size(40, 40),
-		// 			fill: "black",
-		// 			strokeWidth: 2
-		// 		})),
-		// 	GO(go.Panel, "Auto", 
-		// 		GO(go.Shape, "Rectangle", {
-		// 			minSize: new go.Size(40, 40),
-		// 			file: "whitle",
-		// 			strokeWidth: 0
-		// 		}),
-		// 		GO(go.TextBlock, textStyle(),{
-		// 			margin: 8,
-		// 			maxSize: new go.Size(160, NaN),
-		// 			wrap: go.TextBlock.WrapFit,
-		// 			editable: true,
-		// 			fromLinkable:false,
-		// 			toLinkable:false
-		// 		}, new go.Binding("text", "文本").makeTwoWay())),
-		// 	GO(go.Panel, "Auto", 
-		// 		GO(go.Shape, "LineH", {
-		// 			minSize: new go.Size(40, 40),
-		// 			fill: "black",
-		// 			strokeWidth: 2
-		// 		})))
-		// 	);
-			  var structureTemplate = GO(go.Node, "Auto",nodeStyle(),{
-			  	fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
-		        fromLinkable: true, toLinkable: true,
-		        locationSpot: go.Spot.Center
-			  },
-		        GO(go.Panel, "Vertical",
-		          { margin: 0 },
-
-		          
-		            GO(go.Shape, "MinusLine", { height:3, strokeWidth: 3, stroke: 'black', stretch: go.GraphObject.Fill} ),
-		            
-
-		          GO(go.Panel, "Auto",
-		            GO(go.Shape, "Rectangle", { strokeWidth: 0, fill: 'transparent', stretch: go.GraphObject.Fill}),
-		            GO(go.TextBlock, textStyle(),
-		              { margin: 8 ,
-		              fromLinkable:false,
-		              wrap: go.TextBlock.WrapFit,
+				toLinkable:false, alignment: go.Spot.Center,
+				textAlign: "center",
+				text: "加工",
+				name: "LABEL"
+			},new go.Binding("text", "text").makeTwoWay(),
+			new go.Binding("textAlign", "textAlign").makeTwoWay(),
+			new go.Binding("font", "font").makeTwoWay())),
+			makePort("T", go.Spot.Top, true, true),
+			makePort("L", go.Spot.Left, true, true),
+			makePort("R", go.Spot.Right, true, true),
+			makePort("B", go.Spot.Bottom, true, true));
+			var structureTemplate = GO(go.Node, "Auto",nodeStyle(),{
+				fromSpot: go.Spot.AllSides, toSpot: go.Spot.AllSides,
+				// fromLinkable: true, toLinkable: true,
+				fromLinkableDuplicates: true,toLinkableDuplicates:true,
+				locationSpot: go.Spot.Center,
+				resizable: true, desiredSize: new go.Size(70, 50)
+			},new go.Binding("desiredSize", "size", go.Size.parse).makeTwoWay(go.Size.stringify),
+				GO(go.Panel, "Vertical",
+				{ margin: 0},
+					GO(go.Shape, "MinusLine", { height:3, strokeWidth: 3, stroke: 'black', stretch: go.GraphObject.Fill}),
+				GO(go.Panel, "Auto",
+					GO(go.Shape, "Rectangle", { strokeWidth: 0, fill: 'transparent', stretch: go.GraphObject.Fill, desiredSize: new go.Size(70, 38)},new go.Binding("desiredSize", "size", function(str){var tmp = go.Size.parse(str);return new go.Size(tmp.width, tmp.height - 12)}).makeTwoWay(go.Size.stringify)),
+					GO(go.TextBlock, textStyle(),
+					{ margin: 8 ,
+					fromLinkable:false,
 						editable: true,
-					  toLinkable:false},
-		              new go.Binding("text", "文本").makeTwoWay())
-		            ),
-
-		            GO(go.Shape, "MinusLine", { height: 3, strokeWidth: 3, stroke: 'black', stretch: go.GraphObject.Fill} )
-		          
-		        ) // end outer panel
-		      ); // end node
+						toLinkable:false,
+						cursor: "default", 
+						wrap: go.TextBlock.WrapFit,
+						alignment: go.Spot.Center,
+						textAlign: "center",
+						text: "数据存储", name:"LABEL",
+						width: 62},
+						new go.Binding("width", "size", function(str){
+							var tmp = go.Size.parse(str);
+							return tmp.width - 8;
+						}).makeTwoWay(go.Size.stringify),
+						new go.Binding("text", "text").makeTwoWay(),
+						new go.Binding("textAlign", "textAlign").makeTwoWay(),
+						new go.Binding("font", "font").makeTwoWay())
+					),
+					GO(go.Shape, "MinusLine", { height: 3, strokeWidth: 3, stroke: 'black', stretch: go.GraphObject.Fill} )
+				), // end outer panel
+			makePort("T", go.Spot.Top, true, true),
+			makePort("L", go.Spot.Left, true, true),
+			makePort("R", go.Spot.Right, true, true),
+			makePort("B", go.Spot.Bottom, true, true)
+			); // end node
 			// three named ports, one on each side except the bottom, all input only:
 
 		myDiagram.nodeTemplateMap.add('entity', entityTemplate);
@@ -241,11 +205,9 @@ exports.makeImg = async function makeImg(diagram, callback){
 		myDiagram.model.linkToPortIdProperty="toPort";
 
 		var modelJSON = diagram.content;
-		console.log(modelJSON);
 		if (modelJSON == '') {
 			modelJSON = '{"nodeDataArray":[], "linkDataArray":[]}';
 		}
-		console.log(modelJSON);
 		modelJSON = modelJSON.replace(/\n/g, '\\n');
 		var modelContent = JSON.parse(modelJSON);
 

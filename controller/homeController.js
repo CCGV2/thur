@@ -64,11 +64,8 @@ exports.user_new_diagram = (req, res) => {
 			console.log(err.message);
 			return res.redirect('back');
 		}
-		console.log('创建成功');
 		fs.exists(path.resolve(__dirname, '../public', './img/' + file._id + '.png'), function(exist){
 			if (!exist){
-				console.log("不存在");
-				console.log("nmsl");
 				dfd.makeImg(file, function(){
 					User.findByIdAndUpdate(
 					user._id,
