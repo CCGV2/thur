@@ -35,8 +35,10 @@ router.post('/', checkNotLogin, function(req, res, next) {
 		req.flash('success', '登陆成功');
 		// 用户信息写入session
 		console.log(user.models);
+		console.log(typeof user.models);
 		delete user.password;
 		for (var i = 0; i < user.models.length; i++){
+			console.log(typeof user.models[i]);
 			fs.exists(path.resolve(__dirname, '../public', './img/' + user.models[i]._id + '.png'), function(exist){
 				if (!exist){
 					fs.writeFile(path.resolve(__dirname, '../public', './img/' + user.models[i]._id + '.png'), dfd.makeImg(target.models[i]), function(err){
