@@ -54,6 +54,9 @@ exports.save = (req, res) => {
 	// save diagram to database
 	var id = req.params.postID;
 	var content = req.body.data;
+	console.log("save");
+	console.log(id);
+	console.log(content);
 	Diagram.findOne({_id:id}).exec(function(err, diagram) {
 		if (err) {
 			req.flash('error', 'failed');
