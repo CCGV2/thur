@@ -49,9 +49,7 @@ router.post('/', checkNotLogin, function(req, res, next) {
 			fs.exists(path.resolve(__dirname, '../public', './img/' + model._id + '.png'), function(exist){
 				if (!exist){
 					console.log(model);
-					fs.writeFile(path.resolve(__dirname, '../public', './img/' + model._id + '.png'), dfd.makeImg(model), function(err){
-						console.log(err);
-					})
+					dfd.makeImg(model);
 				}
 			});
 		});
