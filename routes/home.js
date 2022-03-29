@@ -37,7 +37,13 @@ router.post('/', checkNotLogin, function(req, res, next) {
 		console.log(user.models);
 		console.log(typeof user.models);
 		delete user.password;
-		user.models.foreach(model=>{
+		var tmparray = user.models;
+		const tmparray = [];
+		for (let i = 0; i < user.models.length; i++){
+			user.models[i].updatedAt = moment(user.models[i].updatedAt).format('LLLL');
+			tmparray.push(user.models[i]);
+		}
+		tmparray.foreach(model=>{
 			console.log(typeof model);
 			console.log(model);
 			fs.exists(path.resolve(__dirname, '../public', './img/' + model._id + '.png'), function(exist){
@@ -48,7 +54,6 @@ router.post('/', checkNotLogin, function(req, res, next) {
 					})
 				}
 			});
-			model.updatedAt = moment(model.updatedAt).format('LLLL');
 		});
 		
 		req.session.user = user;
