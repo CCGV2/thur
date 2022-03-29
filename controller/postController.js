@@ -9,6 +9,7 @@ let AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
 exports.index = (req, res) => {
 	// check whether this diagram is belong to this user.
 	var id = req.params.postID;
+	console.log(id);
 	Diagram.findOne({_id:id}).exec(function(err, diagram) {
 		if (err) {
 			console.log('未找到该模型');
@@ -70,7 +71,9 @@ exports.save = (req, res) => {
 			if (err) {
 				console.log(err);
 			}
-			dfd.makeImg(diagram, function(){});
+			dfd.makeImg(diagram, function(){
+				console.log("缩略图更新调用了");
+			});
 			req.flash('success', '保存成功');
 			req.session.content = diagram.content;
 			return res.json({success:true});
