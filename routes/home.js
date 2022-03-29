@@ -39,6 +39,7 @@ router.post('/', checkNotLogin, function(req, res, next) {
 		delete user.password;
 		for (var i = 0; i < user.models.length; i++){
 			console.log(typeof user.models[i]);
+			console.log(user.models[i]);
 			fs.exists(path.resolve(__dirname, '../public', './img/' + user.models[i]._id + '.png'), function(exist){
 				if (!exist){
 					fs.writeFile(path.resolve(__dirname, '../public', './img/' + user.models[i]._id + '.png'), dfd.makeImg(target.models[i]), function(err){
