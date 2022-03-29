@@ -37,7 +37,6 @@ router.post('/', checkNotLogin, function(req, res, next) {
 		console.log(user.models);
 		console.log(typeof user.models);
 		delete user.password;
-		var tmparray = user.models;
 		const tmparray = [];
 		for (let i = 0; i < user.models.length; i++){
 			user.models[i].updatedAt = moment(user.models[i].updatedAt).format('LLLL');
