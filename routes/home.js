@@ -42,6 +42,8 @@ router.post('/', checkNotLogin, function(req, res, next) {
 			console.log(user.models[i]);
 			fs.exists(path.resolve(__dirname, '../public', './img/' + user.models[i]._id + '.png'), function(exist){
 				if (!exist){
+					console.log(user.models);
+					console.log(user.models[i]);
 					fs.writeFile(path.resolve(__dirname, '../public', './img/' + user.models[i]._id + '.png'), dfd.makeImg(target.models[i]), function(err){
 						console.log(err);
 					})
