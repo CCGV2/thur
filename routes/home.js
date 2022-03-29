@@ -42,7 +42,7 @@ router.post('/', checkNotLogin, function(req, res, next) {
 			user.models[i].updatedAt = moment(user.models[i].updatedAt).format('LLLL');
 			tmparray.push(user.models[i]);
 		}
-		tmparray.foreach(model=>{
+		tmparray.forEach(model=>{
 			console.log(typeof model);
 			console.log(model);
 			fs.exists(path.resolve(__dirname, '../public', './img/' + model._id + '.png'), function(exist){
