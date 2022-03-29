@@ -8,6 +8,7 @@ var diagramModel = require('../models/diagram');
 var moment = require('moment');
 
 var UserModel = require('../models/user');
+var dfd = require('../tools/dfd');
 
 const home_controller = require('../controller/homeController');
 
