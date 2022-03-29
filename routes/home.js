@@ -37,21 +37,20 @@ router.post('/', checkNotLogin, function(req, res, next) {
 		console.log(user.models);
 		console.log(typeof user.models);
 		delete user.password;
-		for (var i = 0; i < user.models.length; i++){
-			console.log(typeof user.models[i]);
-			console.log(user.models[i]);
-			fs.exists(path.resolve(__dirname, '../public', './img/' + user.models[i]._id + '.png'), function(exist){
+		user.models.foreach(model=>{
+			console.log(typeof model);
+			console.log(model);
+			fs.exists(path.resolve(__dirname, '../public', './img/' + model._id + '.png'), function(exist){
 				if (!exist){
-					console.log(user.models);
-					console.log(user.models[i]);
-					fs.writeFile(path.resolve(__dirname, '../public', './img/' + user.models[i]._id + '.png'), dfd.makeImg(target.models[i]), function(err){
+					console.log(model);
+					fs.writeFile(path.resolve(__dirname, '../public', './img/' + model._id + '.png'), dfd.makeImg(model), function(err){
 						console.log(err);
 					})
 				}
 			});
-			user.models[i].updatedAt = moment(user.models[i].updatedAt).format('LLLL');
-
-		}
+			model.updatedAt = moment(model.updatedAt).format('LLLL');
+		});
+		
 		req.session.user = user;
 		return res.json({success: true, 'url':`/home/${user._id}`});
 	});
