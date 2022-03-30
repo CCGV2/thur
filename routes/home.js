@@ -51,6 +51,8 @@ router.post('/', checkNotLogin, function(req, res, next) {
 		});
 		
 		req.session.user = user;
+		console.log("after");
+		console.log(user);
 		console.log(req.session.user);
 		return res.json({success: true, 'url':`/home/${user._id}`});
 	});
