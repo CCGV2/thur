@@ -57,7 +57,6 @@ app.locals.platform = {
 
 // 添加模板必需的三个变量
 app.use(function (req, res, next) {
-	console.log(res.locals);
 	console.log(req.session);
 	res.locals.user = req.session.user;
 	res.locals.success = req.session.success;

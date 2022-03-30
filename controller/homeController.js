@@ -26,6 +26,7 @@ exports.user_detail = (req, res) => {
 	// change the format from database to be used on front
 	var user = req.session.user;
 	console.log(user);
+	console.log("user detail");
 	var target = User.findOne({"_id": user._id}).populate({path: 'models', select:'content title updatedAt'}).then(function(doc){
 		console.log("user detail");
 		console.log(doc);
