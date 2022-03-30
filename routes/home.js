@@ -60,7 +60,10 @@ router.post('/', checkNotLogin, function(req, res, next) {
 
 });
 
-router.get('/:userId', home_controller.user_detail);
+router.get('/:userId', function(req, res){
+	console.log("function!");
+});
+//home_controller.user_detail
 
 router.post('/create', home_controller.user_new_diagram);
 
