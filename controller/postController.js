@@ -7,6 +7,7 @@ const dfd = require('../tools/dfd');
 
 let AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
 exports.index = (req, res) => {
+	console.log("hehe");
 	// check whether this diagram is belong to this user.
 	var id = req.params.postID;
 	console.log("post index");
