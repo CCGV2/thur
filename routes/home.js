@@ -38,11 +38,7 @@ router.post('/', checkNotLogin, function(req, res, next) {
 		console.log(user.models);
 		console.log(typeof user.models);
 		delete user.password;
-		const tmparray = [];
-		for (let i = 0; i < user.models.length; i++){
-			user.models[i].updatedAt = moment(user.models[i].updatedAt).format('LLLL');
-			tmparray.push(user.models[i]);
-		}
+		const tmparray = user.models.toObject();
 		tmparray.forEach(model=>{
 			console.log(typeof model);
 			console.log(model);
@@ -55,6 +51,7 @@ router.post('/', checkNotLogin, function(req, res, next) {
 		});
 		
 		req.session.user = user;
+		console.log(req.session.user);
 		return res.json({success: true, 'url':`/home/${user._id}`});
 	});
 
